@@ -1,13 +1,13 @@
 Here’s the simply 4 step guide to running my project!
 
+#0 Install Python (if you dont already have it)
+
 #1 Create a python environment
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-
+.venv\Scripts\Activate.ps1
 
 #2 Install all the dependencies
-pip install flask flask-cors pandas numpy requests yfinance
+pip install flask flask-cors pandas numpy requests yfinance statsmodel
 
 #3 run the backend
 python app.py
