@@ -1,0 +1,299 @@
+/* ===== Pastel (No Gradients) — White · Soft Teal · Lilac ===== */
+:root{
+  --sky:#AEE7D7;            /* softer TEAL */
+  --pink:#B9A2E5;           /* soft LILAC */
+  --pink-soft:#F3ECFB;      /* very light lilac for panels */
+  --white:#ffffff;
+  --ink:#2b3142;            /* main text (dark slate) */
+  --ink-muted:rgba(43,49,66,.75);
+  --shadow: 0 10px 24px rgba(18,38,63,.08);
+}
+
+/* Page (no background gradients) */
+html,body{height:100%;}
+body{
+  margin:0; color:var(--ink);
+  background:#fff;                                /* solid white */
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+}
+.shell{max-width:1200px; margin:28px auto; padding:0 16px;}
+
+/* Topbar */
+.topbar{
+  display:grid; grid-template-columns: 1fr auto; align-items:center;
+  gap:16px; margin-bottom:16px;
+}
+.brand{display:flex; align-items:center; gap:10px; justify-self:center;}
+.app-title{margin:0; letter-spacing:1px; color: var(--ink);}
+
+/* Controls */
+.controls{
+  display:grid; grid-template-columns: 1fr auto; gap:10px; justify-items:start;
+}
+.input-group{ position:relative; width:100%; }
+.input-group input{
+  width:98%; padding:16px 0px 12px 14px;  /* room for inside button */
+  border-radius:10px; border:1px solid rgba(12,26,46,.12);
+  background: #f7f8fb; color:var(--ink); outline:none;   /* solid, no gradient */
+}
+.input-group input::placeholder{ color:rgba(43,49,66,.55); }
+
+/* TWIN (both) button INSIDE input — SOLID TEAL, no lift */
+.btn-both-inside{
+  position:absolute; right:0px; top:50%; transform:translateY(-50%); height: 97%;
+  padding:13px 15px; border-radius:8px; border:0; cursor:pointer;
+  color:#0a2540; font-weight:700;
+  background: var(--sky);                        /* solid soft teal */
+  box-shadow: 0 6px 14px rgba(18,38,63,.12);
+  transition: background .25s ease, color .25s ease;
+}
+.btn-both-inside:hover{
+  background:#9DDDCB;                            /* softer hover teal */
+  color:#0a2540;
+}
+
+/* Quick forecast (right) button */
+.btn{
+  padding:14px 13px; border-radius:10px; border:0; cursor:pointer;
+  color:#1b2742; font-weight:600; background:#f2f4f8;   /* solid, no gradient */
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.btn:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(18,38,63,.14);
+}
+.btn:active{
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(18,38,63,.12);
+}
+.btn-plus{ background: var(--pink); color:#1b2742; }      /* solid lilac */
+
+/* Grid + Cards */
+.grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+
+/* ===== Cards ===== */
+/* LEFT: TWIN — SOLID SOFT TEAL CARD */
+.card{
+  background: var(--sky);                         /* solid soft teal */
+  color:#0a2540;                                  /* dark text for readability */
+  border-radius:16px; box-shadow: var(--shadow); overflow:hidden;
+  border:1px solid rgba(12,26,46,.08);
+}
+.card-head{
+  padding:14px 16px;
+  background: rgba(0,0,0,.04);                    /* subtle solid tint */
+}
+.card-head h2{ margin:0; line-height:1; color:#0a2540; }
+.card-head .muted{ margin:5px 0 0; color: rgba(10,37,64,.7); }
+
+/* RIGHT: TWIN+ — SOFT LILAC CARD */
+.card-plus{
+  background: var(--pink-soft);                   /* solid very light lilac */
+  color:var(--ink);
+  border:1px solid rgba(185,162,229,.25);
+}
+.card-head-plus{
+  background: rgba(185,162,229,.18);              /* solid lilac tint */
+}
+.card-plus .card-head h2{ color: var(--ink); }
+.card-plus .card-head .muted{ color: var(--ink-muted); }
+
+/* Chat (transparent scrollbar) */
+.chatbox.big{ height:500px; overflow:auto; padding:14px 16px; }
+.chatbox.big::-webkit-scrollbar{ width:10px; }
+.chatbox.big::-webkit-scrollbar-track{ background: transparent; }
+.chatbox.big::-webkit-scrollbar-thumb{
+  background: rgba(12,26,46,.16);                /* solid thumb */
+  border-radius:10px;
+}
+.messages{ scrollbar-width: thin; scrollbar-color: rgba(12,26,46,.2) transparent; }
+
+/* Bubbles */
+.messages .user{ margin:6px 0; font-weight:600; text-align:right; }
+.messages .bot{ margin:10px 0; }
+
+/* Text helpers */
+.title{ font-weight:800; margin-bottom:.25rem; }
+.muted{ color:var(--ink-muted); font-size:.92rem; }
+.up{ color:#12b886; } .down{ color:#ff6b6b; }
+.sparkline{ margin:.5rem 0; color:#0a2540; }      /* visible over teal & lilac */
+
+/* Inline buttons in messages (same size) */
+.btnrow{ display:flex; gap:10px; margin-top:.5rem; }
+.explain-btn, .plus-btn, .back-btn{
+  padding:10px 12px; border-radius:8px; border:1px solid rgba(12,26,46,.12);
+  background: #f2f4f8; color: #1b2742; cursor:pointer; font-weight:600;
+  min-width:108px; text-align:center;
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease, background .15s ease;
+}
+.explain-btn:hover, .plus-btn:hover, .back-btn:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(18,38,63,.14);
+}
+.explain-btn:active, .plus-btn:active, .back-btn:active{
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(18,38,63,.12);
+}
+.plus-btn{
+  background: var(--pink);         /* solid lilac */
+  border-color: transparent;
+  color: #1b2742;
+}
+.back-btn{
+  background: var(--sky);          /* solid soft teal */
+  color:#0a2540;
+  border-color: transparent;
+}
+.back-btn:hover{
+  background:#9DDDCB;              /* match softer hover teal */
+}
+
+/* 3-dot loader */
+.loading{
+  display:flex; justify-content:center; align-items:center; margin:6px 0;
+}
+.loading span{
+  display:inline-block; width:8px; height:8px; margin:0 2px;
+  background-color:#1b2742; border-radius:50%; animation:bounce .6s infinite alternate;
+}
+.loading span:nth-child(2){ animation-delay:.2s; }
+.loading span:nth-child(3){ animation-delay:.4s; }
+@keyframes bounce{ to{ opacity:.3; transform: translateY(-8px); } }
+
+/* Fade-in */
+@keyframes fadeIn { from{opacity:0; transform: translateY(2px);} to{opacity:1; transform:none;} }
+.fade{ opacity:0; animation: fadeIn .45s ease-out forwards; }
+
+/* Ensure TWIN+ action buttons stay lilac everywhere */
+.controls .btn-plus { background: var(--pink) !important; color:#1b2742 !important; }
+.messages .plus-btn { background: var(--pink) !important; border-color: transparent !important; color:#1b2742 !important; }
+
+/* Responsive */
+@media (max-width: 1100px){
+  .chatbox.big{ height:460px; }
+}
+@media (max-width: 860px){
+  .grid{ grid-template-columns:1fr; }
+  .chatbox.big{ height:420px; }
+}
+/* ===== Explain panel & metrics (shared) ===== */
+.explain-body { padding: 8px 10px; }
+.explain-title { margin: 0 0 6px; font-weight: 700; }
+
+/* key–value grid (used in TWIN+ metrics view) */
+.kv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 6px 0 8px;
+}
+.kv dt { margin: 0; opacity: .8; }
+.kv dd { margin: 0; }
+
+/* beginner bullets (Translate view) */
+.bullets { margin: 6px 0 8px; padding-left: 18px; }
+.bullets li { margin: 4px 0; }
+
+/* small status chips */
+.tag {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 11px;
+  line-height: 1.4;
+  border: 1px solid currentColor;
+  opacity: .85;
+}
+.tag.good { color: #1db954; border-color: rgba(29,185,84,.4); background: rgba(29,185,84,.12); }
+.tag.bad  { color: #e44;    border-color: rgba(238,68,68,.4);  background: rgba(238,68,68,.12); }
+.tag.meh  { color: #9aa3ad; border-color: rgba(154,163,173,.35); background: rgba(154,163,173,.12); }
+
+/* translate toggle button */
+.explain-actions { margin-top: 8px; display: flex; gap: 8px; }
+.explain-actions .xlate {
+  font-size: 12px; padding: 6px 10px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.25); background: transparent; cursor: pointer;
+}
+:root[data-theme="light"] .explain-actions .xlate { border-color: rgba(0,0,0,.25); }
+
+/* compact list used under TWIN+ headline */
+.kv-lite { list-style: none; padding: 0; margin: 6px 0 8px; }
+.kv-lite li { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; }
+.kv-lite li > span:first-child { opacity: .8; }
+
+/* tiny text helpers already used by JS */
+.small { font-size: 12px; }
+.muted { opacity: .7; }
+
+/* utility */
+.hidden { display: none !important; }
+.explain-actions .xlate { color: inherit !important; border: 1px solid currentColor; background: transparent; }
+.explain-actions .xlate:hover { filter: brightness(1.05); }
+/* Translate button: raise on hover */
+.explain-actions .xlate{
+  color: inherit; 
+  background: transparent; 
+  border: 1px solid currentColor; 
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, opacity .18s ease;
+}
+.explain-actions .xlate:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 8px 18px rgba(0,0,0,.25);
+  filter: brightness(1.05);
+}
+.explain-actions .xlate:active{
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,.2);
+}
+
+/* Swap animation for Translate click */
+@keyframes explain-swap-in{
+  from{ opacity:0; transform: translateY(6px) scale(.98); }
+  to  { opacity:1; transform: translateY(0)    scale(1);   }
+}
+@keyframes explain-swap-out{
+  from{ opacity:1; transform: translateY(0)    scale(1);   }
+  to  { opacity:0; transform: translateY(6px) scale(.98); }
+}
+.explain-anim-in{ animation: explain-swap-in .22s ease both; }
+.explain-anim-out{ animation: explain-swap-out .18s ease both; }
+
+/* utility if not present */
+.hidden{ display:none !important; }
+/* --- Did-you-mean suggestion UI --- */
+.suggest { margin: 10px 0 4px; }
+.suggest .title { font-weight: 800; margin-bottom: 8px; }
+.suggest .row { display:flex; gap:10px; flex-wrap: wrap; }
+
+.suggest .btn-yes,
+.suggest .btn-no,
+.suggest .btn-retry {
+  cursor: pointer; border-radius: 10px; padding: 10px 14px; font-weight: 800;
+  border: 1px solid transparent; transition: transform .14s ease, filter .14s ease, opacity .14s ease;
+}
+.suggest .btn-yes { background: #22c55e; color: #fff; }        /* green */
+.suggest .btn-no  { background: #ef4444; color: #fff; }        /* red */
+.suggest .btn-retry { background: transparent; color: inherit; border-color: currentColor; }
+
+.suggest .btn-yes:hover,
+.suggest .btn-no:hover,
+.suggest .btn-retry:hover { transform: translateY(-1px); filter: brightness(1.05); }
+
+/* small press effect when clicking (JS toggles .press) */
+.suggest .btn-yes.press,
+.suggest .btn-no.press,
+.suggest .btn-retry.press { transform: translateY(0); filter: none; opacity:.9; }
+/* === Light theme: black toggle UI === */
+.theme-btn span { background:#000 !important; }
+
+.theme-menu{
+  background: rgba(0,0,0,.90) !important;
+  border-color: rgba(255,255,255,.18) !important;
+}
+.theme-menu .menu-title{ color: rgba(255,255,255,.9) !important; }
+.theme-menu button{ color:#fff !important; }
+.theme-menu button:hover{ background: rgba(255,255,255,.14) !important; }

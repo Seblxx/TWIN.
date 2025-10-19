@@ -1,0 +1,7 @@
+{
+    "python.pythonPath": "/path/to/your/python/interpreter",
+    "python.analysis.extraPaths": [
+        "/path/to/your/venv/lib/python3.x/site-packages",
+        "/path/to/other/important/modules"
+    ]
+}

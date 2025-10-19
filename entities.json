@@ -1,0 +1,95 @@
+{
+    "entities": [
+      {
+        "name": "stock_ticker",
+        "entries": [
+          { "value": "AAPL", "synonyms": ["Apple"] },
+          { "value": "GOOG", "synonyms": ["Google"] },
+          { "value": "MSFT", "synonyms": ["Microsoft"] },
+          { "value": "TSLA", "synonyms": ["Tesla"] },
+          { "value": "AMZN", "synonyms": ["Amazon"] },
+          { "value": "FB", "synonyms": ["Facebook"] },
+          { "value": "NFLX", "synonyms": ["Netflix"] },
+          { "value": "BABA", "synonyms": ["Alibaba"] },
+          { "value": "NVDA", "synonyms": ["Nvidia"] },
+          { "value": "JPM", "synonyms": ["JPMorgan"] }
+        ]
+      },
+      {
+        "name": "company_name",
+        "entries": [
+          { "value": "Apple", "synonyms": ["AAPL"] },
+          { "value": "Google", "synonyms": ["GOOG"] },
+          { "value": "Microsoft", "synonyms": ["MSFT"] },
+          { "value": "Tesla", "synonyms": ["TSLA"] },
+          { "value": "Amazon", "synonyms": ["AMZN"] },
+          { "value": "Facebook", "synonyms": ["FB"] },
+          { "value": "Netflix", "synonyms": ["NFLX"] },
+          { "value": "Alibaba", "synonyms": ["BABA"] },
+          { "value": "Nvidia", "synonyms": ["NVDA"] },
+          { "value": "JPMorgan", "synonyms": ["JPM"] }
+        ]
+      },
+      {
+        "name": "date",
+        "entries": [
+          { "value": "today", "synonyms": ["Today"] },
+          { "value": "tomorrow", "synonyms": ["Tomorrow"] },
+          { "value": "yesterday", "synonyms": ["Yesterday"] },
+          { "value": "2024-06-20", "synonyms": ["June 20, 2024"] },
+          { "value": "next Monday", "synonyms": ["Next Monday"] },
+          { "value": "last Friday", "synonyms": ["Last Friday"] },
+          { "value": "in 2 weeks", "synonyms": ["In 2 weeks"] },
+          { "value": "2023-01-01", "synonyms": ["January 1, 2023"] },
+          { "value": "end of the month", "synonyms": ["End of the month"] },
+          { "value": "next quarter", "synonyms": ["Next quarter"] }
+        ]
+      },
+      {
+        "name": "time_period",
+        "entries": [
+          { "value": "60 days", "synonyms": ["two months"] },
+          { "value": "1 year", "synonyms": ["12 months", "a year"] },
+          { "value": "6 months", "synonyms": ["half a year"] },
+          { "value": "3 weeks", "synonyms": ["three weeks"] },
+          { "value": "next quarter", "synonyms": ["the next three months"] },
+          { "value": "next year", "synonyms": ["the following year"] },
+          { "value": "5 years", "synonyms": ["five years"] },
+          { "value": "2 months", "synonyms": ["sixty days"] },
+          { "value": "a month from now", "synonyms": ["30 days"] },
+          { "value": "next week", "synonyms": ["7 days"] }
+        ]
+      },
+      {
+        "name": "prediction_type",
+        "entries": [
+          { "value": "stock price", "synonyms": ["share price"] },
+          { "value": "stock trend", "synonyms": ["market trend"] },
+          { "value": "market forecast", "synonyms": ["market prediction"] },
+          { "value": "price movement", "synonyms": ["price change"] },
+          { "value": "stock value", "synonyms": ["share value"] },
+          { "value": "price prediction", "synonyms": ["price estimate"] },
+          { "value": "future value", "synonyms": ["future price"] },
+          { "value": "market prediction", "synonyms": ["market outlook"] },
+          { "value": "stock outlook", "synonyms": ["stock forecast"] },
+          { "value": "price estimate", "synonyms": ["value prediction"] }
+        ]
+      },
+      {
+        "name": "action",
+        "entries": [
+          { "value": "predict", "synonyms": ["forecast"] },
+          { "value": "forecast", "synonyms": ["predict"] },
+          { "value": "estimate", "synonyms": ["calculate"] },
+          { "value": "tell me", "synonyms": ["inform me"] },
+          { "value": "give me", "synonyms": ["provide me"] },
+          { "value": "show", "synonyms": ["display"] },
+          { "value": "calculate", "synonyms": ["compute"] },
+          { "value": "determine", "synonyms": ["ascertain"] },
+          { "value": "provide", "synonyms": ["give"] },
+          { "value": "analyze", "synonyms": ["examine"] }
+        ]
+      }
+    ]
+  }
+  

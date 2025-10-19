@@ -1,0 +1,153 @@
+/* ===== MONOCHROME — Deep Teals, High Contrast ===== */
+:root{
+  --mono-a:#1b3462;   /* primary deep teal */
+  --mono-b:#0c1653;   /* darker teal */
+  --white:#ffffff;
+  --ink:#e9f1f4;      /* high-contrast copy on dark */
+  --ink-muted:rgba(233,241,244,.75);
+  --shadow: 0 12px 28px rgba(0,0,0,.35);
+}
+
+/* Page */
+html,body{height:100%;}
+body{
+  margin:0; color:var(--ink);
+  background: linear-gradient(180deg, var(--mono-a), var(--mono-b));
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+}
+.shell{max-width:1200px; margin:28px auto; padding:0 16px;}
+
+/* Topbar */
+.topbar{
+  display:grid; grid-template-columns: 1fr auto; align-items:center;
+  gap:16px; margin-bottom:16px;
+}
+.brand{display:flex; align-items:center; gap:10px; justify-self:center;}
+.app-title{margin:0; letter-spacing:1px; color: var(--white);}
+
+/* Controls */
+.controls{
+  display:grid; grid-template-columns: 1fr auto; gap:10px; justify-items:start;
+}
+.input-group{ position:relative; width:100%; }
+.input-group input{
+  width:98%; padding:16px 0px 12px 14px;
+  border-radius:10px; border:1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.07); color:var(--white); outline:none;
+}
+.input-group input::placeholder{ color:rgba(255,255,255,.6); }
+
+/* TWIN (both) button inside input — GREEN */
+.btn-both-inside{
+  position:absolute; right:0px; top:50%; transform:translateY(-50%); height: 97%;
+  padding:13px 15px; border-radius:8px; border:0; cursor:pointer;
+  color:#052b1a; font-weight:800;
+  background: #22c55e; /* green */
+  box-shadow: 0 8px 18px rgba(0,0,0,.25);
+  transition: transform .15s ease, filter .15s ease;
+}
+.btn-both-inside:hover{ transform: translateY(-2px); filter: brightness(1.05); }
+
+/* Right-side quick button — RED for “Analyze with TWIN-” */
+.btn{
+  padding:14px 13px; border-radius:10px; border:1px solid rgba(255,255,255,.12);
+  cursor:pointer; font-weight:700; background: rgba(255,255,255,.08); color: var(--white);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.btn:hover{ transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.28); }
+.btn:active{ transform: translateY(-1px); box-shadow: 0 6px 14px rgba(0,0,0,.24); }
+
+.btn-plus{
+  background:#ef4444 !important;  /* red */
+  border-color: transparent !important;
+  color:#1b0a0a !important;
+}
+
+/* Grid */
+.grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+
+/* Cards */
+.card{
+  background: var(--mono-a);
+  color: var(--ink);
+  border-radius:16px; box-shadow: var(--shadow); overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+}
+.card-head{
+  padding:14px 16px;
+  background: rgba(255,255,255,.06);
+}
+.card-head h2{ margin:0; line-height:1; color: var(--white); }
+.card-head .muted{ margin:5px 0 0; color: var(--ink-muted); }
+
+/* Right card */
+.card-plus{
+  background: var(--mono-b);
+  color: var(--ink);
+  border:1px solid rgba(255,255,255,.12);
+}
+.card-head-plus{
+  background: rgba(255,255,255,.05);
+}
+.card-plus .card-head h2{ color: var(--white); }
+.card-plus .card-head .muted{ color: var(--ink-muted); }
+
+/* Chatbox */
+.chatbox.big{ height:500px; overflow:auto; padding:14px 16px; }
+.chatbox.big::-webkit-scrollbar{ width:10px; }
+.chatbox.big::-webkit-scrollbar-track{ background: transparent; }
+.chatbox.big::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,.28);
+  border-radius:10px;
+}
+.messages{ scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.28) transparent; }
+
+/* Bubbles */
+.messages .user{ margin:6px 0; font-weight:700; text-align:right; color:#d9ffea; }
+.messages .bot{ margin:10px 0; }
+
+/* Helpers */
+.title{ font-weight:800; margin-bottom:.25rem; }
+.muted{ color:var(--ink-muted); font-size:.92rem; }
+.up{ color:#22c55e; } .down{ color:#f87171; }
+.sparkline{ margin:.5rem 0; color:#ffffff; }
+
+/* Inline buttons inside messages */
+.btnrow{ display:flex; gap:10px; margin-top:.5rem; }
+.explain-btn, .plus-btn, .back-btn{
+  padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.08); color: var(--white); cursor:pointer; font-weight:700;
+  min-width:108px; text-align:center;
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease, background .15s ease;
+}
+.explain-btn:hover, .plus-btn:hover, .back-btn:hover{
+  transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.28);
+}
+.plus-btn{ background:#ef4444; border-color: transparent; color:#1b0a0a; }
+.back-btn{ background:#22c55e; border-color: transparent; color:#052b1a; }
+
+/* Loader */
+.loading{ display:flex; justify-content:center; align-items:center; margin:6px 0; }
+.loading span{
+  display:inline-block; width:8px; height:8px; margin:0 2px;
+  background-color:rgba(255,255,255,.9); border-radius:50%; animation:bounce .6s infinite alternate;
+}
+.loading span:nth-child(2){ animation-delay:.2s; }
+.loading span:nth-child(3){ animation-delay:.4s; }
+@keyframes bounce{ to{ opacity:.3; transform: translateY(-8px); } }
+
+/* Fade-in */
+@keyframes fadeIn { from{opacity:0; transform: translateY(2px);} to{opacity:1; transform:none;} }
+.fade{ opacity:0; animation: fadeIn .45s ease-out forwards; }
+
+/* Suggest buttons keep green/red */
+.suggest .btn-yes{ background:#22c55e; color:#052b1a; }
+.suggest .btn-no { background:#ef4444; color:#1b0a0a; }
+.suggest .btn-retry{ background:transparent; color:var(--ink); border-color: currentColor; }
+
+/* Responsive */
+@media (max-width: 1100px){ .chatbox.big{ height:460px; } }
+@media (max-width: 860px){
+  .grid{ grid-template-columns:1fr; }
+  .chatbox.big{ height:420px; }
+}

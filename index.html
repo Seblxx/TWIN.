@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TWIN — Stock Assistant</title>
+
+  <!-- THEME: default = royal (swap via theme-toggle.js) -->
+  <link id="themeCss" rel="stylesheet" href="royal.css"/>
+  
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+
+  <!-- Theme switcher + App logic -->
+  <script defer src="theme-toggle.js"></script>
+  <script defer src="script.js"></script>
+
+  <!-- Minimal, isolated styles for the floating theme toggle + modal ONLY -->
+  <style>
+  /* Floating action button (kept out of layout) */
+  .theme-fab { 
+    position: fixed; 
+    right: 24px; 
+    bottom: 24px; 
+    z-index: 9999; 
+    display: grid; 
+    justify-items: end;
+  }
+
+  .theme-btn {
+    width: 52px; 
+    height: 52px; 
+    border: 0; 
+    border-radius: 14px; 
+    cursor: pointer;
+
+    /* removed box look: fully transparent, no blur, no shadow */
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
+
+    display: grid; 
+    place-items: center;
+    transition: transform .25s ease, filter .25s ease;
+  }
+  /* Spin on hover */
+  .theme-btn:hover { transform: rotate(180deg); }
+
+  /* Thicker, tighter bars (default = white bars) */
+  .theme-btn span { 
+    display: block; 
+    width: 28px; 
+    height: 4px; 
+    margin: 3px 0; 
+    background: #fff; 
+    opacity: .95; 
+    border-radius: 3px;
+    transition: transform .25s ease, opacity .25s ease;
+  }
+
+  /* On LIGHT theme: bars become black */
+  :root[data-theme="light"] .theme-btn span { background: #000; }
+
+  /* Dropdown menu (transparent glass, smooth fade/slide) */
+  .theme-menu {
+    position: absolute;
+    right: 0;
+    bottom: 64px; /* sit above the FAB */
+    min-width: 260px;
+    padding: 10px;
+    border-radius: 14px;
+    background: rgba(0,0,0,.35);           /* transparent */
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,.18);
+    box-shadow: 0 12px 28px rgba(0,0,0,.3);
+
+    opacity: 0;
+    transform: translateY(8px) scale(.98);
+    pointer-events: none;
+    transition: opacity .22s ease, transform .22s ease;
+  }
+  .theme-menu.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+
+  .menu-group { padding: 6px; }
+  .menu-title {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .22px;
+    color: rgba(255,255,255,.85);
+    padding: 4px 6px 6px 6px;
+    text-transform: uppercase;
+  }
+
+  .theme-menu button {
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;                   /* bigger touch target */
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: .2px;
+    transition: background .18s ease, transform .12s ease, filter .12s ease;
+  }
+  .theme-menu button:hover {
+    background: rgba(255,255,255,.14);
+    transform: translateY(-1px);
+    filter: brightness(1.03);
+  }
+  .theme-menu button:active {
+    transform: translateY(0);
+    filter: none;
+  }
+
+  /* Modal (transparent glass + fade/slide) */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    backdrop-filter: blur(2px);
+    display: none;            /* hidden by default */
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity .22s ease;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-overlay.fade-in { opacity: 1; }
+
+  .modal {
+    width: min(720px, 90vw);
+    border-radius: 16px;
+    background: rgba(10,10,10,.72);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.18);
+    box-shadow: 0 20px 40px rgba(0,0,0,.35);
+    transform: translateY(8px) scale(.98);
+    transition: transform .22s ease, opacity .22s ease;
+    opacity: 0;
+  }
+  .modal.show {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  .modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(255,255,255,.16);
+    font-weight: 800;
+    letter-spacing: .25px;
+  }
+  .modal-body {
+    padding: 16px 18px 18px 18px;
+    line-height: 1.55;
+  }
+  .modal-close {
+    border: 1px solid rgba(255,255,255,.35);
+    background: transparent;
+    color: #fff;
+    border-radius: 10px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: filter .18s ease, transform .12s ease;
+  }
+  .modal-close:hover { filter: brightness(1.05); transform: translateY(-1px); }
+</style>
+
+</head>
+<body>
+  <div class="shell">
+
+    <!-- Top bar -->
+    <div class="topbar">
+      <!-- Input with TWIN (both) button INSIDE -->
+      <div class="controls">
+        <div class="input-group">
+          <input
+            id="userInput"
+            type="text"
+            placeholder="Enter a stock and a duration to receive a prediction e.g., Apple in 3 days, NVDA next week"
+          />
+          <!-- NOTE: no .btn class here, so no lift animation -->
+          <button class="btn-both-inside" onclick="sendTwin()">TWIN</button>
+        </div>
+        <!-- Quick forecast to the right -->
+        <button class="btn btn-plus" onclick="sendBasic()">Analyze with TWIN-</button>
+      </div>
+
+      <div class="brand">
+        <h1 class="app-title">TWIN.</h1>
+        <i class="fas fa-chart-line"></i>
+      </div>
+    </div>
+
+    <!-- Two cards -->
+    <div class="grid">
+      <!-- LEFT: TWIN- (fast) -->
+      <section class="card">
+        <header class="card-head">
+          <h2>TWIN-</h2>
+          <p class="muted">Fast forecast</p>
+        </header>
+        <div class="chatbox big">
+          <div id="messages-basic" class="messages"></div>
+        </div>
+      </section>
+
+      <!-- RIGHT: TWIN+ (deep) -->
+      <section class="card card-plus">
+        <header class="card-head card-head-plus">
+          <h2>TWIN+</h2>
+          <p class="muted">Deeper diagnostics</p>
+        </header>
+        <div class="chatbox big">
+          <div id="messages-plus" class="messages"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Floating theme toggle (out of flow; won’t touch layout) -->
+  <div class="theme-fab">
+    <button id="themeBtn" class="theme-btn" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <div id="themeMenu" class="theme-menu">
+      <div class="menu-group">
+        <div class="menu-title">Actions</div>
+        <button id="menuNew">CLEAR</button>
+        <button id="menuWhatIs">What is TWIN?</button>
+        <button id="menuHowTo">How to use?</button>
+      </div>
+      <div class="menu-group">
+        <div class="menu-title">Themes</div>
+        <button data-css="royal.css">ROYAL</button>
+        <button data-css="dark.css">DARK</button>
+        <button data-css="light.css">LIGHT</button>
+        <button data-css="monochrome.css">MONOCHROME</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modalOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div id="modal" class="modal" tabindex="-1">
+      <div class="modal-head">
+        <span id="modalTitle">Title</span>
+        <button id="modalClose" class="modal-close" type="button">Close</button>
+      </div>
+      <div id="modalBody" class="modal-body"></div>
+    </div>
+  </div>
+</body>
+</html>
