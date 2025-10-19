@@ -121,7 +121,7 @@
       whatBtn.addEventListener('click', () => {
         const html = `
           <p>The concept behind <strong>TWIN</strong> is a dual-screen assistant that helps you form quick stock expectations or get deeper analysis at the simple touch of a button.</p>
-          <p>It's mainly aimed to beginner's who are looking to get into investing and understanding stocks.</p>
+          <p>It's mainly aimed for beginners who are looking to get into investing and understanding stocks.</p>
           <p><strong>TWIN-</strong> gives a simple, intuitive projection using an <em>Exponential Moving Average</em> style drift estimate over your chosen horizon.</p>
           <p><strong>TWIN+</strong> runs diagnostics to inform conviction and risk:</p>
           <ul>
@@ -185,3 +185,4 @@
     initMenu();
   });
 })();
+
