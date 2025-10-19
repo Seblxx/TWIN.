@@ -22,6 +22,7 @@ body{
               radial-gradient(1400px 1200px at 110% 10%, rgba(255,255,255,.12) -20%, transparent 55%),
               var(--blue);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+  overflow-y: hidden;
 }
 .shell{max-width:1200px; margin:28px auto; padding:0 16px;}
 
@@ -280,3 +281,4 @@ body{
 .suggest .btn-yes.press,
 .suggest .btn-no.press,
 .suggest .btn-retry.press { transform: translateY(0); filter: none; opacity:.9; }
+
