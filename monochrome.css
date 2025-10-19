@@ -1,7 +1,7 @@
 /* ===== MONOCHROME — Deep Teals, High Contrast ===== */
 :root{
-  --mono-a:#1b3462;   /* primary deep teal */
-  --mono-b:#0c1653;   /* darker teal */
+  --mono-a:#0b1135;   /* primary deep teal */
+  --mono-b:#223354;   /* darker teal */
   --white:#ffffff;
   --ink:#e9f1f4;      /* high-contrast copy on dark */
   --ink-muted:rgba(233,241,244,.75);
@@ -14,6 +14,7 @@ body{
   margin:0; color:var(--ink);
   background: linear-gradient(180deg, var(--mono-a), var(--mono-b));
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+   overflow-y: hidden;
 }
 .shell{max-width:1200px; margin:28px auto; padding:0 16px;}
 
@@ -41,12 +42,15 @@ body{
 .btn-both-inside{
   position:absolute; right:0px; top:50%; transform:translateY(-50%); height: 97%;
   padding:13px 15px; border-radius:8px; border:0; cursor:pointer;
-  color:#052b1a; font-weight:800;
+  color:#d7e4de; font-weight:800;
   background: #22c55e; /* green */
   box-shadow: 0 8px 18px rgba(0,0,0,.25);
-  transition: transform .15s ease, filter .15s ease;
+  transition: background .2s ease, color .2s ease;
 }
-.btn-both-inside:hover{ transform: translateY(-2px); filter: brightness(1.05); }
+.btn-both-inside:hover{
+  color: #000; /* Black text on hover */
+  background: linear-gradient(to bottom right, #34d399, #16a34a); /* New green gradient */
+}
 
 /* Right-side quick button — RED for “Analyze with TWIN-” */
 .btn{
@@ -60,7 +64,7 @@ body{
 .btn-plus{
   background:#ef4444 !important;  /* red */
   border-color: transparent !important;
-  color:#1b0a0a !important;
+  color:#e6e3e3 !important;
 }
 
 /* Grid */
@@ -103,7 +107,7 @@ body{
 .messages{ scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.28) transparent; }
 
 /* Bubbles */
-.messages .user{ margin:6px 0; font-weight:700; text-align:right; color:#d9ffea; }
+.messages .user{ margin:6px 0; font-weight:700; text-align:right; color:#fcfcfc; }
 .messages .bot{ margin:10px 0; }
 
 /* Helpers */
@@ -123,7 +127,7 @@ body{
 .explain-btn:hover, .plus-btn:hover, .back-btn:hover{
   transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.28);
 }
-.plus-btn{ background:#ef4444; border-color: transparent; color:#1b0a0a; }
+.plus-btn{ background:#22c55e; border-color: transparent; color:#f1f1f1; }
 .back-btn{ background:#22c55e; border-color: transparent; color:#052b1a; }
 
 /* Loader */
