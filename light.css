@@ -15,6 +15,7 @@ body{
   margin:0; color:var(--ink);
   background:#fff;                                /* solid white */
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+  overflow-y: hidden;
 }
 .shell{max-width:1200px; margin:28px auto; padding:0 16px;}
 
@@ -297,3 +298,4 @@ body{
 .theme-menu .menu-title{ color: rgba(255,255,255,.9) !important; }
 .theme-menu button{ color:#fff !important; }
 .theme-menu button:hover{ background: rgba(255,255,255,.14) !important; }
+
