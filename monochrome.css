@@ -1,4 +1,4 @@
-/* ===== MONOCHROME — Deep Teals, High Contrast ===== */
+
 :root{
   --mono-a:#0b1135;   /* primary deep teal */
   --mono-b:#223354;   /* darker teal */
@@ -8,7 +8,7 @@
   --shadow: 0 12px 28px rgba(0,0,0,.35);
 }
 
-/* Page */
+
 html,body{height:100%;}
 body{
   margin:0; color:var(--ink);
@@ -18,7 +18,7 @@ body{
 }
 .shell{max-width:1200px; margin:28px auto; padding:0 16px;}
 
-/* Topbar */
+
 .topbar{
   display:grid; grid-template-columns: 1fr auto; align-items:center;
   gap:16px; margin-bottom:16px;
@@ -26,7 +26,7 @@ body{
 .brand{display:flex; align-items:center; gap:10px; justify-self:center;}
 .app-title{margin:0; letter-spacing:1px; color: var(--white);}
 
-/* Controls */
+
 .controls{
   display:grid; grid-template-columns: 1fr auto; gap:10px; justify-items:start;
 }
@@ -38,7 +38,7 @@ body{
 }
 .input-group input::placeholder{ color:rgba(255,255,255,.6); }
 
-/* TWIN (both) button inside input — GREEN */
+
 .btn-both-inside{
   position:absolute; right:0px; top:50%; transform:translateY(-50%); height: 97%;
   padding:13px 15px; border-radius:8px; border:0; cursor:pointer;
@@ -52,7 +52,7 @@ body{
   background: linear-gradient(to bottom right, #34d399, #16a34a); /* New green gradient */
 }
 
-/* Right-side quick button — RED for “Analyze with TWIN-” */
+
 .btn{
   padding:14px 13px; border-radius:10px; border:1px solid rgba(255,255,255,.12);
   cursor:pointer; font-weight:700; background: rgba(255,255,255,.08); color: var(--white);
@@ -67,10 +67,10 @@ body{
   color:#e6e3e3 !important;
 }
 
-/* Grid */
+
 .grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
 
-/* Cards */
+
 .card{
   background: var(--mono-a);
   color: var(--ink);
@@ -84,7 +84,7 @@ body{
 .card-head h2{ margin:0; line-height:1; color: var(--white); }
 .card-head .muted{ margin:5px 0 0; color: var(--ink-muted); }
 
-/* Right card */
+
 .card-plus{
   background: var(--mono-b);
   color: var(--ink);
@@ -96,7 +96,7 @@ body{
 .card-plus .card-head h2{ color: var(--white); }
 .card-plus .card-head .muted{ color: var(--ink-muted); }
 
-/* Chatbox */
+
 .chatbox.big{ height:500px; overflow:auto; padding:14px 16px; }
 .chatbox.big::-webkit-scrollbar{ width:10px; }
 .chatbox.big::-webkit-scrollbar-track{ background: transparent; }
@@ -106,17 +106,17 @@ body{
 }
 .messages{ scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.28) transparent; }
 
-/* Bubbles */
+
 .messages .user{ margin:6px 0; font-weight:700; text-align:right; color:#fcfcfc; }
 .messages .bot{ margin:10px 0; }
 
-/* Helpers */
+
 .title{ font-weight:800; margin-bottom:.25rem; }
 .muted{ color:var(--ink-muted); font-size:.92rem; }
 .up{ color:#22c55e; } .down{ color:#f87171; }
 .sparkline{ margin:.5rem 0; color:#ffffff; }
 
-/* Inline buttons inside messages */
+
 .btnrow{ display:flex; gap:10px; margin-top:.5rem; }
 .explain-btn, .plus-btn, .back-btn{
   padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,.16);
@@ -130,7 +130,7 @@ body{
 .plus-btn{ background:#22c55e; border-color: transparent; color:#f1f1f1; }
 .back-btn{ background:#22c55e; border-color: transparent; color:#052b1a; }
 
-/* Loader */
+
 .loading{ display:flex; justify-content:center; align-items:center; margin:6px 0; }
 .loading span{
   display:inline-block; width:8px; height:8px; margin:0 2px;
@@ -140,18 +140,19 @@ body{
 .loading span:nth-child(3){ animation-delay:.4s; }
 @keyframes bounce{ to{ opacity:.3; transform: translateY(-8px); } }
 
-/* Fade-in */
+
 @keyframes fadeIn { from{opacity:0; transform: translateY(2px);} to{opacity:1; transform:none;} }
 .fade{ opacity:0; animation: fadeIn .45s ease-out forwards; }
 
-/* Suggest buttons keep green/red */
+
 .suggest .btn-yes{ background:#22c55e; color:#052b1a; }
 .suggest .btn-no { background:#ef4444; color:#1b0a0a; }
 .suggest .btn-retry{ background:transparent; color:var(--ink); border-color: currentColor; }
 
-/* Responsive */
+
 @media (max-width: 1100px){ .chatbox.big{ height:460px; } }
 @media (max-width: 860px){
   .grid{ grid-template-columns:1fr; }
   .chatbox.big{ height:420px; }
 }
+
