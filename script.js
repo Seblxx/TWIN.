@@ -1,4 +1,4 @@
-// ---------- helpers ----------
+
 function scrollDown(messagesEl, smooth = true){
   const scroller = messagesEl?.closest('.chatbox');
   if (!scroller) return;
@@ -56,7 +56,7 @@ function fade(el){ el.classList.add('fade'); return el; }
   document.head.appendChild(tag);
 })();
 
-// Enter key => run TWIN
+
 document.addEventListener('DOMContentLoaded', () => {
   const inputEl = document.getElementById('userInput');
   if (!inputEl) return;
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.isComposing) return; // ignore IME composition
     const val = (inputEl.value || '').trim();
 
-    // ENTER => fast forecast (TWIN-)
+    // key enter to run the regular twin-
     if (e.key === 'Enter') {
       e.preventDefault();
       if (val) sendBasic();
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// timeframe detection
+// checks the time
 const DUR_RE = /(\d+)?\s*(day|days|week|weeks|month|months|year|years)\b/i;
 function hasDuration(text){
   const t = (text || '').toLowerCase().trim();
@@ -95,7 +95,7 @@ function hasDuration(text){
   return DUR_RE.test(t);
 }
 
-// ---------- robust autoscroll: observe changes in messages ----------
+// automatically jump to last event
 (function initAutoScroll(){
   ['messages-basic','messages-plus'].forEach(id => {
     const pane = document.getElementById(id);
@@ -105,7 +105,7 @@ function hasDuration(text){
   });
 })();
 
-// ---------- TWIN (fast) ----------
+
 async function sendBasic() {
   const inputEl = document.getElementById('userInput');
   const q = (inputEl.value || '').trim();
@@ -165,7 +165,7 @@ async function sendBasic() {
       return;
     }
 
-    // Forecast
+  
     const delta = data.result - data.lastClose;
     const pct   = (delta / data.lastClose) * 100;
     const sign  = delta >= 0 ? '+' : '';
@@ -205,7 +205,7 @@ async function sendBasic() {
   inputEl.value = '';
 }
 
-// ---------- TWIN+ (deep) ----------
+
 async function sendPlus(queryFromTwin = null) {
   const inputEl = document.getElementById('userInput');
   const raw = (queryFromTwin ?? inputEl.value);
@@ -256,7 +256,7 @@ async function sendPlus(queryFromTwin = null) {
       ? ` (range ${d.donchian50_lo?.toFixed(2)} – ${d.donchian50_hi?.toFixed(2)})`
       : '';
 
-    // NOTE: removed sparkline from TWIN+ (per request)
+    
     bot.innerHTML = `
       <div class="title">${data.stock}${data.duration ? ' in ' + data.duration : ''}</div>
       <div class="muted">${data.method.replace('_',' ')}</div>
@@ -288,7 +288,7 @@ async function sendPlus(queryFromTwin = null) {
       diagnostics: d
     });
 
-    // NO renderSparkline here (graph removed from TWIN+)
+   
 
   } catch (e) {
     pane.removeChild(loading);
@@ -297,7 +297,7 @@ async function sendPlus(queryFromTwin = null) {
   }
 }
 
-// ---------- run both ----------
+
 async function sendTwin(){
   const q = (document.getElementById('userInput').value || '').trim();
   if (!q) return;
@@ -316,7 +316,7 @@ async function sendTwin(){
   }
 }
 
-// ---------- Explain (shared) with clearer HOW + Animated Translate ----------
+-
 function attachExplain(btn, panel, data) {
   const fmt2 = (n) => Number(n).toFixed(2);
 
@@ -331,7 +331,7 @@ function attachExplain(btn, panel, data) {
       `;
     }
 
-    // TWIN+ — detailed with translate
+
     if (data.mode === 'plus') {
       const proHTML = `
        <div class="explain-pro">
@@ -368,7 +368,7 @@ function attachExplain(btn, panel, data) {
       return `<div class="explain-body">${proHTML}${friendlyHTML}</div>`;
     }
 
-    // TWIN- — clearer HOW
+    
     const dir = (data.delta || 0) >= 0 ? 'up' : 'down';
     const mname = (data.method || '').replace('_',' ');
     const back = data.backtest ? `<li>Recent average error ≈ <strong>$${fmt2(data.backtest.mae)}</strong>.</li>` : '';
@@ -392,7 +392,7 @@ function attachExplain(btn, panel, data) {
     `;
   };
 
-  // Ensure base hidden state
+
   panel.classList.add('hidden');
   panel.style.display = 'none';
 
@@ -406,7 +406,7 @@ function attachExplain(btn, panel, data) {
       panel.classList.remove('fade'); panel.offsetWidth; panel.classList.add('fade');
       btn.textContent = 'Hide';
 
-      // Wire Translate toggles (TWIN+) with animation
+      
       panel.querySelectorAll('.xlate').forEach(el => {
         el.addEventListener('click', () => {
           const pro = panel.querySelector('.explain-pro');
@@ -463,7 +463,7 @@ function attachExplain(btn, panel, data) {
   });
 }
 
-// ---------- sparkline (TWIN- only) ----------
+
 async function renderSparkline(ticker, container) {
   try {
     // FETCH UNCHANGED
@@ -486,3 +486,4 @@ async function renderSparkline(ticker, container) {
     if (messages) scrollDown(messages, true);
   } catch {}
 }
+
