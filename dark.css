@@ -1,4 +1,4 @@
-/* ===== Theme ===== */
+
 :root{
   --blue:#233C76;
   --pink:#ff5ea8;
@@ -17,7 +17,7 @@
   --shadow: 0 10px 24px rgba(0,0,0,.25);
 }
 
-/* Page */
+
 html,body{height:100%;}
 body{
   margin:0; color:var(--ink);
@@ -31,7 +31,7 @@ body{
 }
 .shell{max-width:1200px; margin:28px auto; padding:0 16px;}
 
-/* Topbar */
+
 .topbar{
   display:grid; grid-template-columns: 1fr auto; align-items:center;
   gap:16px; margin-bottom:16px;
@@ -39,7 +39,7 @@ body{
 .brand{display:flex; align-items:center; gap:10px; justify-self:center;}
 .app-title{margin:0; letter-spacing:1px;}
 
-/* Controls */
+
 .controls{
   display:grid; grid-template-columns: 1fr auto; gap:10px; justify-items:start;
 }
@@ -51,7 +51,6 @@ body{
 }
 .input-group input::placeholder{ color:rgba(255,255,255,.7); }
 
-/* TWIN (both) button INSIDE input (no lift animation) */
 .btn-both-inside{
   position:absolute; right:0px; top:50%; transform:translateY(-50%); height: 97%;
   padding:13px 15px; border-radius:8px; border:0; cursor:pointer;
@@ -65,18 +64,18 @@ body{
   color:#000;
 }
 
-/* Quick forecast button */
+
 .btn{
   padding:14px 13px; border-radius:10px; border:0; cursor:pointer;
   color:var(--white); font-weight:600;
 }
 .btn-plus{ background: var(--pink); }
 
-/* Grid + Cards */
+
 .grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
 
-/* ===== Cards ===== */
-/* LEFT: TWIN (make this one black) */
+
+
 .card{
   background: #000;                     /* <- pure black card */
   border-radius:16px; box-shadow: var(--shadow); overflow:hidden;
@@ -86,11 +85,11 @@ body{
 .card-head h2{ margin:0; line-height:1; }
 .card-head .muted{ margin:5px 0 0; }
 
-/* RIGHT: TWIN+ (keep soft pink look) */
+
 .card-plus{ background: var(--card-grad-plus); border-color: rgba(255,94,168,.25); }
 .card-head-plus{ background: var(--head-glass-plus); }
 
-/* Chat (transparent scrollbar) */
+
 .chatbox.big{ height:500px; overflow:auto; padding:14px 16px; } /* was 560 */
 .chatbox.big::-webkit-scrollbar{ width:10px; }
 .chatbox.big::-webkit-scrollbar-track{ background: transparent; }
@@ -100,17 +99,17 @@ body{
 }
 .messages{ scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.25) transparent; }
 
-/* Bubbles */
+
 .messages .user{ margin:6px 0; font-weight:600; text-align:right; }
 .messages .bot{ margin:10px 0; }
 
-/* Text helpers */
+
 .title{ font-weight:800; margin-bottom:.25rem; }
 .muted{ color:var(--ink-muted); font-size:.92rem; }
 .up{ color:#18c37d; } .down{ color:#ff6b6b; }
 .sparkline{ margin:.5rem 0; color:var(--white); }
 
-/* Inline buttons in messages (same size) */
+
 .btnrow{ display:flex; gap:10px; margin-top:.5rem; }
 .explain-btn, .plus-btn, .back-btn{
   padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,.35);
@@ -118,7 +117,7 @@ body{
   min-width:108px; text-align:center;
 }
 
-/* 3-dot loader (unchanged) */
+
 .loading{
   display:flex; justify-content:center; align-items:center; margin:6px 0;
 }
@@ -134,7 +133,7 @@ body{
 @keyframes fadeIn { from{opacity:0; transform: translateY(2px);} to{opacity:1; transform:none;} }
 .fade{ opacity:0; animation: fadeIn .45s ease-out forwards; }
 
-/* ------- Lift animation for ALL buttons except the inside search-bar TWIN ------- */
+
 .btn,
 .btn-plus,
 .explain-btn,
@@ -161,11 +160,11 @@ body{
   box-shadow: 0 6px 16px rgba(0,0,0,.22);
 }
 
-/* Keep TWIN+ buttons pink everywhere */
+
 .controls .btn-plus { background: var(--pink) !important; }
 .messages .plus-btn { background: var(--pink) !important; border-color: transparent !important; }
 
-/* Responsive tweak */
+
 @media (max-width: 1100px){
   .chatbox.big{ height:460px; }
 }
@@ -173,11 +172,11 @@ body{
   .grid{ grid-template-columns:1fr; }
   .chatbox.big{ height:420px; }
 }
-/* ===== Explain panel & metrics (shared) ===== */
+
 .explain-body { padding: 8px 10px; }
 .explain-title { margin: 0 0 6px; font-weight: 700; }
 
-/* key–value grid (used in TWIN+ metrics view) */
+
 .kv {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -187,11 +186,10 @@ body{
 .kv dt { margin: 0; opacity: .8; }
 .kv dd { margin: 0; }
 
-/* beginner bullets (Translate view) */
 .bullets { margin: 6px 0 8px; padding-left: 18px; }
 .bullets li { margin: 4px 0; }
 
-/* small status chips */
+
 .tag {
   margin-left: 6px;
   padding: 1px 6px;
@@ -205,7 +203,7 @@ body{
 .tag.bad  { color: #e44;    border-color: rgba(238,68,68,.4);  background: rgba(238,68,68,.12); }
 .tag.meh  { color: #9aa3ad; border-color: rgba(154,163,173,.35); background: rgba(154,163,173,.12); }
 
-/* translate toggle button */
+
 .explain-actions { margin-top: 8px; display: flex; gap: 8px; }
 .explain-actions .xlate {
   font-size: 12px; padding: 6px 10px; border-radius: 8px;
@@ -213,16 +211,16 @@ body{
 }
 :root[data-theme="light"] .explain-actions .xlate { border-color: rgba(0,0,0,.25); }
 
-/* compact list used under TWIN+ headline */
+
 .kv-lite { list-style: none; padding: 0; margin: 6px 0 8px; }
 .kv-lite li { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; }
 .kv-lite li > span:first-child { opacity: .8; }
 
-/* tiny text helpers already used by JS */
+
 .small { font-size: 12px; }
 .muted { opacity: .7; }
 
-/* utility */
+
 .hidden { display: none !important; }
 .explain-actions .xlate { color: inherit !important; border: 1px solid currentColor; background: transparent; }
 .explain-actions .xlate:hover { filter: brightness(1.05); }
@@ -247,7 +245,7 @@ body{
   box-shadow: 0 4px 10px rgba(0,0,0,.2);
 }
 
-/* Swap animation for Translate click */
+
 @keyframes explain-swap-in{
   from{ opacity:0; transform: translateY(6px) scale(.98); }
   to  { opacity:1; transform: translateY(0)    scale(1);   }
@@ -259,7 +257,7 @@ body{
 .explain-anim-in{ animation: explain-swap-in .22s ease both; }
 .explain-anim-out{ animation: explain-swap-out .18s ease both; }
 
-/* utility if not present */
+
 .hidden{ display:none !important; }
 /* --- Did-you-mean suggestion UI --- */
 .suggest { margin: 10px 0 4px; }
@@ -284,4 +282,5 @@ body{
 .suggest .btn-yes.press,
 .suggest .btn-no.press,
 .suggest .btn-retry.press { transform: translateY(0); filter: none; opacity:.9; }
+
 
