@@ -5,20 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TWIN — Stock Assistant</title>
 
-  <!-- THEME: default = royal (swap via theme-toggle.js) -->
+  <!-- this will be the default theme -->
   <link id="themeCss" rel="stylesheet" href="royal.css"/>
   
 
-  <!-- Icons -->
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
 
-  <!-- Theme switcher + App logic -->
+  
   <script defer src="theme-toggle.js"></script>
   <script defer src="script.js"></script>
 
-  <!-- Minimal, isolated styles for the floating theme toggle + modal ONLY -->
   <style>
-  /* Floating action button (kept out of layout) */
   .theme-fab { 
     position: fixed; 
     right: 24px; 
@@ -35,7 +33,7 @@
     border-radius: 14px; 
     cursor: pointer;
 
-    /* removed box look: fully transparent, no blur, no shadow */
+
     background: transparent;
     backdrop-filter: none;
     box-shadow: none;
@@ -44,10 +42,10 @@
     place-items: center;
     transition: transform .25s ease, filter .25s ease;
   }
-  /* Spin on hover */
+
   .theme-btn:hover { transform: rotate(180deg); }
 
-  /* Thicker, tighter bars (default = white bars) */
+
   .theme-btn span { 
     display: block; 
     width: 28px; 
@@ -59,10 +57,10 @@
     transition: transform .25s ease, opacity .25s ease;
   }
 
-  /* On LIGHT theme: bars become black */
+  
   :root[data-theme="light"] .theme-btn span { background: #000; }
 
-  /* Dropdown menu (transparent glass, smooth fade/slide) */
+
   .theme-menu {
     position: absolute;
     right: 0;
@@ -99,7 +97,7 @@
   .theme-menu button {
     width: 100%;
     text-align: left;
-    padding: 12px 14px;                   /* bigger touch target */
+    padding: 12px 14px;                
     border: 0;
     border-radius: 10px;
     background: transparent;
@@ -120,13 +118,13 @@
     filter: none;
   }
 
-  /* Modal (transparent glass + fade/slide) */
+  
   .modal-overlay {
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,.45);
     backdrop-filter: blur(2px);
-    display: none;            /* hidden by default */
+    display: none;         
     align-items: center;
     justify-content: center;
     z-index: 10000;
@@ -181,9 +179,8 @@
 <body>
   <div class="shell">
 
-    <!-- Top bar -->
+  
     <div class="topbar">
-      <!-- Input with TWIN (both) button INSIDE -->
       <div class="controls">
         <div class="input-group">
           <input
@@ -191,10 +188,10 @@
             type="text"
             placeholder="Enter a stock and a duration to receive a prediction e.g., Apple in 3 days, NVDA next week"
           />
-          <!-- NOTE: no .btn class here, so no lift animation -->
+          
           <button class="btn-both-inside" onclick="sendTwin()">TWIN</button>
         </div>
-        <!-- Quick forecast to the right -->
+     
         <button class="btn btn-plus" onclick="sendBasic()">Analyze with TWIN-</button>
       </div>
 
@@ -204,7 +201,7 @@
       </div>
     </div>
 
-    <!-- Two cards -->
+  
     <div class="grid">
       <!-- LEFT: TWIN- (fast) -->
       <section class="card">
@@ -217,7 +214,7 @@
         </div>
       </section>
 
-      <!-- RIGHT: TWIN+ (deep) -->
+    
       <section class="card card-plus">
         <header class="card-head card-head-plus">
           <h2>TWIN+</h2>
@@ -230,7 +227,7 @@
     </div>
   </div>
 
-  <!-- Floating theme toggle (out of flow; won’t touch layout) -->
+
   <div class="theme-fab">
     <button id="themeBtn" class="theme-btn" aria-label="Menu" aria-expanded="false">
       <span></span><span></span><span></span>
@@ -252,7 +249,7 @@
     </div>
   </div>
 
-  <!-- Modal -->
+
   <div id="modalOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
     <div id="modal" class="modal" tabindex="-1">
       <div class="modal-head">
@@ -264,3 +261,4 @@
   </div>
 </body>
 </html>
+
