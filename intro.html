@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome to TWIN</title>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css?v=2"/>
+  <link rel="stylesheet" id="themeCss" href="dark.css?v=13"/>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Base reset and fonts */
+    html, body {
+      height: 100%;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .intro-container {
+      text-align: center;
+      max-width: 600px;
+      padding: 40px;
+      background: var(--container-bg, rgba(255,255,255,.08));
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      border: 1px solid var(--border-color, rgba(255,255,255,.18));
+      box-shadow: 0 20px 60px rgba(0,0,0,.4);
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .logo {
+      font-size: 72px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      background: var(--logo-gradient, linear-gradient(135deg, #48b6ff, #ff5ea8));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      /* For monochrome theme - will be overridden by theme CSS if logo-shadow exists */
+      text-shadow: var(--logo-shadow, none);
+    }
+
+    .tagline {
+      font-size: 20px;
+      margin-bottom: 12px;
+      opacity: 0.9;
+      font-weight: 600;
+      color: var(--text-color, white);
+    }
+
+    /* Light theme override */
+    [data-theme="light"] .tagline,
+    [data-theme="light"] .description,
+    [data-theme="light"] .feature-list li {
+      color: #000000 !important;
+    }
+
+    .description {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 32px;
+      opacity: 0.8;
+      color: var(--text-color, white);
+    }
+
+    .feature-list {
+      list-style: none;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+
+    .feature-list li {
+      padding: 12px 0;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      opacity: 0.85;
+      color: var(--text-color, white);
+    }
+
+    .feature-list li i {
+      background: var(--icon-color, linear-gradient(135deg, #48b6ff, #ff5ea8));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 18px;
+      width: 24px;
+    }
+
+    .login-section {
+      display: none;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,.15);
+    }
+
+    .login-section.active {
+      display: block;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--modal-overlay, rgba(0, 0, 0, 0.7));
+      z-index: 10000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.fade-in {
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: var(--modal-bg, rgba(255, 255, 255, 0.1));
+      backdrop-filter: blur(30px);
+      border-radius: 20px;
+      border: 1px solid var(--border-color, rgba(255, 255, 255, 0.2));
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      padding: 32px;
+      max-width: 450px;
+      width: 90%;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-content.show {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .modal-header h3 {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0;
+      color: var(--text-color, white);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-color, white);
+      font-size: 28px;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      opacity: 1;
+    }
+
+    .modal-body {
+      color: var(--text-color, white);
+    }
+
+    .input-wrapper {
+      margin-bottom: 16px;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--input-border, rgba(255,255,255,.2));
+      background: var(--input-bg, rgba(255,255,255,.12));
+      color: var(--text-color, white);
+      font-size: 15px;
+      outline: none;
+      transition: all .3s ease;
+    }
+
+    .input-wrapper input:focus {
+      border-color: var(--focus-color, #48b6ff);
+      background: var(--input-focus-bg, rgba(255,255,255,.18));
+      box-shadow: 0 0 0 3px var(--focus-shadow, rgba(72,182,255,.15));
+    }
+
+    .input-wrapper input::placeholder {
+      color: var(--placeholder-color, rgba(255,255,255,.6));
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      border-radius: 12px;
+      border: none;
+      background: var(--primary-gradient, linear-gradient(90deg, #48b6ff, #ff5ea8));
+      color: var(--btn-text, white);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .3s ease;
+      box-shadow: none;
+      margin-bottom: 12px;
+    }
+    
+    /* Special styling for liquidglass theme - white button with black text */
+    [data-theme="liquidglass"] .btn-primary {
+      background: #ffffff !important;
+      color: #000000 !important;
+    }
+    
+    /* Sign In button for liquidglass - black with white text */
+    [data-theme="liquidglass"] .btn-secondary {
+      background: #000000 !important;
+      color: #ffffff !important;
+      border-color: #ffffff !important;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color, rgba(255,255,255,.3));
+      background: transparent;
+      color: var(--text-color, white);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .3s ease;
+    }
+
+    .btn-secondary:hover {
+      background: var(--hover-bg, rgba(255,255,255,.1));
+      border-color: var(--border-color-hover, rgba(255,255,255,.5));
+    }
+
+    .toggle-login {
+      margin-top: 20px;
+      font-size: 14px;
+      opacity: 0.7;
+    }
+
+    .toggle-login a {
+      color: var(--link-color, #48b6ff);
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+
+    .toggle-login a:hover {
+      opacity: 0.8;
+      text-decoration: underline;
+    }
+
+    .skip-link {
+      display: block;
+      margin-top: 16px;
+      color: rgba(255,255,255,.6);
+      font-size: 14px;
+      text-decoration: none;
+      transition: color .2s;
+    }
+
+    .skip-link:hover {
+      color: rgba(255,255,255,.9);
+    }
+
+    /* Notification Modal */
+    .notification-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background: var(--notification-bg, rgba(10,10,10,.95));
+      backdrop-filter: blur(30px);
+      border-radius: 16px;
+      border: 1px solid var(--border-color, rgba(255,255,255,.2));
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+      padding: 32px;
+      max-width: 400px;
+      width: 90%;
+      z-index: 10001;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    .notification-modal.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+      pointer-events: auto;
+    }
+    .notification-modal h3 {
+      margin: 0 0 12px 0;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-color, white);
+    }
+    .notification-modal p {
+      margin: 0 0 24px 0;
+      opacity: 0.85;
+      line-height: 1.5;
+      color: var(--text-color, white);
+    }
+    .notification-modal button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      background: var(--primary-gradient, linear-gradient(90deg, #48b6ff, #ff5ea8));
+      color: var(--btn-text, white);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s ease;
+    }
+    .notification-modal button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(72,182,255,.4);
+    }
+    .notification-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.6);
+      z-index: 10000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .notification-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .version {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      font-size: 12px;
+      opacity: 0.5;
+    }
+
+    /* Theme toggle circle - top left */
+    .theme-toggle-circle {
+      position: fixed;
+      left: 24px;
+      top: 24px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.3);
+      cursor: pointer;
+      transition: all .25s ease;
+      z-index: 9999;
+      box-shadow: 0 4px 16px rgba(0,0,0,.3);
+    }
+    .theme-toggle-circle:hover {
+      transform: scale(1.1);
+      border-color: rgba(255,255,255,.5);
+      box-shadow: 0 6px 24px rgba(0,0,0,.4);
+    }
+
+    @media (max-width: 768px) {
+      .intro-container {
+        max-width: 90%;
+        padding: 30px 20px;
+      }
+
+      .logo {
+        font-size: 56px;
+      }
+
+      .tagline {
+        font-size: 18px;
+      }
+
+      .description {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Theme toggle circle -->
+  <div id="themeToggle" class="theme-toggle-circle"></div>
+
+  <div class="intro-container">
+    <div class="logo">TWIN.</div>
+    <div class="tagline">Stock Market Intelligence</div>
+    <div class="description">
+      Powered by advanced machine learning and technical analysis, TWIN provides intelligent stock price predictions and comprehensive market diagnostics.
+    </div>
+
+    <ul class="feature-list">
+      <li><i class="fas fa-chart-line"></i> Real-time price predictions with multiple forecasting models</li>
+      <li><i class="fas fa-brain"></i> ML-powered TWIN+ diagnostics with risk analysis</li>
+      <li><i class="fas fa-star"></i> Log in to save predictions, track accuracy, and rate forecasts to strengthen our model</li>
+    </ul>
+
+    <button class="btn-primary" id="getStartedBtn">Get Started</button>
+    <button class="btn-secondary" id="loginToggleBtn">Sign In</button>
+  </div>
+
+  <!-- Login Modal -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Welcome Back</h3>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="input-wrapper" id="usernameWrapper" style="display:none;">
+          <input type="text" id="usernameInput" placeholder="Username" />
+        </div>
+        <div class="input-wrapper">
+          <input type="text" id="emailInput" placeholder="Email or Username" />
+        </div>
+        <div class="input-wrapper">
+          <input type="password" id="passwordInput" placeholder="Password" />
+        </div>
+        <button class="btn-primary" id="loginBtn">Sign In</button>
+        <div class="toggle-login">
+          <span id="toggleText">Don't have an account?</span> <a id="toggleLink">Sign up</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="version">v1.0.0</div>
+
+  <!-- Notification Modal -->
+  <div class="notification-overlay" id="notificationOverlay"></div>
+  <div class="notification-modal" id="notificationModal">
+    <h3 id="notificationTitle">Notification</h3>
+    <p id="notificationMessage">Message here</p>
+    <button id="notificationOk">OK</button>
+  </div>
+
+  <!-- Supabase Authentication -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    let supabaseClient;
+    
+    // Notification modal function
+    function showNotification(title, message) {
+      const overlay = document.getElementById('notificationOverlay');
+      const modal = document.getElementById('notificationModal');
+      const titleEl = document.getElementById('notificationTitle');
+      const messageEl = document.getElementById('notificationMessage');
+      const okBtn = document.getElementById('notificationOk');
+      
+      titleEl.textContent = title;
+      messageEl.textContent = message;
+      
+      overlay.classList.add('show');
+      modal.classList.add('show');
+      
+      const closeNotification = () => {
+        overlay.classList.remove('show');
+        modal.classList.remove('show');
+        okBtn.removeEventListener('click', closeNotification);
+        overlay.removeEventListener('click', closeNotification);
+      };
+      
+      okBtn.addEventListener('click', closeNotification);
+      overlay.addEventListener('click', closeNotification);
+    }
+    
+    // Fetch Supabase config from backend
+    fetch('http://127.0.0.1:5000/api/config')
+      .then(res => res.json())
+      .then(config => {
+        if (config.supabaseUrl && config.supabaseUrl !== 'YOUR_SUPABASE_URL_HERE') {
+          supabaseClient = supabase.createClient(config.supabaseUrl, config.supabaseKey);
+          // Don't auto-redirect - let user choose to login or get started
+          // checkSession();
+        } else {
+          console.warn('Supabase not configured. Using demo mode.');
+          initDemoMode();
+        }
+      })
+      .catch(err => {
+        console.error('Failed to load config:', err);
+        initDemoMode();
+      });
+    
+    // Check if user is already logged in
+    async function checkSession() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session) {
+        localStorage.setItem('twin_user_logged_in', 'true');
+        localStorage.setItem('twin_user_email', session.user.email);
+        localStorage.setItem('twin_supabase_token', session.access_token);
+        window.location.href = 'index.html';
+      }
+    }
+    
+    // Demo mode (when Supabase not configured)
+    function initDemoMode() {
+      console.log('Running in demo mode');
+    }
+    
+    // Wait for DOM to be ready
+    document.addEventListener('DOMContentLoaded', () => {
+      // Theme management - applies theme CSS dynamically
+      const THEMES = [
+        { name: 'Royal', file: 'royal.css', color: 'linear-gradient(135deg, #1e3a8a, #3b82f6)' },
+        { name: 'Dark', file: 'dark.css', color: '#1a1a2e' },
+        { name: 'Light', file: 'light.css', color: '#f0f0f0' },
+        { name: 'Monochrome', file: 'monochrome.css', color: '#1e3a5f' },
+        { name: 'Liquid Glass', file: 'liquidglass.css', color: '#000000' }
+      ];
+      let currentThemeIndex = 0;
+
+      function setTheme(cssFile) {
+        // Apply theme to page
+        const link = document.getElementById('themeCss');
+        if (link) {
+          link.href = cssFile + '?v=13';
+        }
+        
+        // Set data-theme attribute for CSS targeting
+        if (cssFile.includes('liquidglass')) {
+          document.documentElement.setAttribute('data-theme', 'liquidglass');
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+        }
+        
+        // Save theme for main app
+        try { localStorage.setItem('twin_theme_css', cssFile); } catch {}
+        
+        // Update circle color
+        updateThemeCircle(cssFile);
+      }
+
+      function updateThemeCircle(cssFile) {
+        const themeCircle = document.getElementById('themeToggle');
+        if (!themeCircle) return;
+
+        const theme = THEMES.find(t => t.file === cssFile);
+        if (theme) {
+          themeCircle.style.background = theme.color;
+          currentThemeIndex = THEMES.indexOf(theme);
+        }
+      }
+
+      function cycleTheme() {
+        currentThemeIndex = (currentThemeIndex + 1) % THEMES.length;
+        setTheme(THEMES[currentThemeIndex].file);
+      }
+
+      // Initialize theme on load
+      const savedTheme = localStorage.getItem('twin_theme_css') || 'dark.css';
+      const themeIndex = THEMES.findIndex(t => t.file === savedTheme);
+      if (themeIndex !== -1) currentThemeIndex = themeIndex;
+      setTheme(savedTheme);
+
+      // Add click handler to theme circle
+      const themeCircle = document.getElementById('themeToggle');
+      if (themeCircle) {
+        themeCircle.addEventListener('click', cycleTheme);
+      }
+
+      const getStartedBtn = document.getElementById('getStartedBtn');
+      const loginToggleBtn = document.getElementById('loginToggleBtn');
+      const loginModal = document.getElementById('loginModal');
+      const modalContent = loginModal.querySelector('.modal-content');
+      const modalClose = document.getElementById('modalClose');
+      const loginBtn = document.getElementById('loginBtn');
+      const toggleLink = document.getElementById('toggleLink');
+      const toggleText = document.getElementById('toggleText');
+      const modalTitle = document.getElementById('modalTitle');
+      const emailInput = document.getElementById('emailInput');
+      const passwordInput = document.getElementById('passwordInput');
+
+      let isSignupMode = false;
+
+      // Get Started - go directly to app (guest mode)
+      getStartedBtn.addEventListener('click', () => {
+        // Clear all user data for a fresh guest session
+        localStorage.removeItem('twin_user_logged_in');
+        localStorage.removeItem('twin_user_email');
+        localStorage.removeItem('twin_user_name');
+        localStorage.removeItem('twin_supabase_token');
+        localStorage.removeItem('twin_last_query');
+        localStorage.setItem('twin_user_mode', 'guest');
+        window.location.href = 'index.html';
+      });
+
+      // Open login modal
+      loginToggleBtn.addEventListener('click', () => {
+        isSignupMode = false;
+        updateModalMode();
+        loginModal.classList.add('open');
+        requestAnimationFrame(() => {
+          loginModal.classList.add('fade-in');
+          modalContent.classList.add('show');
+        });
+        setTimeout(() => emailInput.focus(), 300);
+      });
+
+      // Toggle between login and signup
+      toggleLink.addEventListener('click', () => {
+        isSignupMode = !isSignupMode;
+        updateModalMode();
+        emailInput.value = '';
+        passwordInput.value = '';
+        emailInput.focus();
+      });
+
+      // Update modal based on mode
+      function updateModalMode() {
+        const usernameWrapper = document.getElementById('usernameWrapper');
+        if (isSignupMode) {
+          modalTitle.textContent = 'Create Account';
+          loginBtn.textContent = 'Sign Up';
+          toggleText.textContent = 'Already have an account?';
+          toggleLink.textContent = 'Sign in';
+          emailInput.placeholder = 'Email address';
+          usernameWrapper.style.display = 'block';
+        } else {
+          modalTitle.textContent = 'Welcome Back';
+          loginBtn.textContent = 'Sign In';
+          toggleText.textContent = "Don't have an account?";
+          toggleLink.textContent = 'Sign up';
+          emailInput.placeholder = 'Email or Username';
+          usernameWrapper.style.display = 'none';
+        }
+      }
+
+      // Close modal function
+      function closeLoginModal() {
+        loginModal.classList.remove('fade-in');
+        modalContent.classList.remove('show');
+        setTimeout(() => {
+          loginModal.classList.remove('open');
+        }, 300);
+      }
+
+      // Close modal ONLY on X button click
+      modalClose.addEventListener('click', closeLoginModal);
+
+      // Handle login/signup
+      loginBtn.addEventListener('click', async () => {
+        const email = emailInput.value.trim();
+        const username = document.getElementById('usernameInput').value.trim();
+        const password = passwordInput.value.trim();
+
+        if (!email || !password) {
+          showNotification('Missing Information', 'Please enter both email/username and password');
+          return;
+        }
+
+        if (isSignupMode && !username) {
+          showNotification('Missing Username', 'Please enter a username');
+          return;
+        }
+
+        // If Supabase is configured, use real auth
+        if (supabaseClient) {
+          try {
+            loginBtn.textContent = isSignupMode ? 'Creating account...' : 'Signing in...';
+            loginBtn.disabled = true;
+            
+            if (isSignupMode) {
+              // Sign up
+              if (password.length < 6) {
+                throw new Error('Password must be at least 6 characters');
+              }
+              
+              const { data, error } = await supabaseClient.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                  data: {
+                    username: username
+                  }
+                }
+              });
+              
+              if (error) throw error;
+              
+              // Store session immediately and redirect (no email confirmation needed)
+              const displayName = username;
+              localStorage.setItem('twin_user_logged_in', 'true');
+              localStorage.setItem('twin_user_email', email);
+              localStorage.setItem('twin_user_name', displayName);
+              localStorage.setItem('twin_user_mode', 'authenticated');
+              if (data.session) {
+                localStorage.setItem('twin_supabase_token', data.session.access_token);
+              }
+              
+              loginBtn.textContent = 'Success! Redirecting...';
+              loginBtn.style.background = 'linear-gradient(90deg, #22c55e, #16a34a)';
+              
+              setTimeout(() => {
+                window.location.href = 'index.html';
+              }, 800);
+              
+            } else {
+              // Sign in
+              const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: password
+              });
+              
+              if (error) throw error;
+              
+              // Store session and username
+              const displayName = data.user.user_metadata?.username || email.split('@')[0];
+              localStorage.setItem('twin_user_logged_in', 'true');
+              localStorage.setItem('twin_user_email', email);
+              localStorage.setItem('twin_user_name', displayName);
+              localStorage.setItem('twin_user_mode', 'authenticated');
+              localStorage.setItem('twin_supabase_token', data.session.access_token);
+              
+              loginBtn.textContent = 'Success! Redirecting...';
+              loginBtn.style.background = 'linear-gradient(90deg, #22c55e, #16a34a)';
+              
+              setTimeout(() => {
+                window.location.href = 'index.html';
+              }, 800);
+            }
+          } catch (error) {
+            loginBtn.textContent = isSignupMode ? 'Sign Up' : 'Sign In';
+            loginBtn.disabled = false;
+            loginBtn.style.background = '';
+            showNotification('Authentication Error', error.message);
+          }
+        } else {
+          // Demo mode - simple validation
+          const displayName = isSignupMode ? username : email.split('@')[0];
+          if ((email.includes('@') || email.length > 2) && password.length >= 4) {
+            localStorage.setItem('twin_user_logged_in', 'true');
+            localStorage.setItem('twin_user_email', email);
+            localStorage.setItem('twin_user_name', displayName);
+            localStorage.setItem('twin_user_mode', 'authenticated');
+            
+            loginBtn.textContent = 'Success! Redirecting...';
+            loginBtn.style.background = 'linear-gradient(90deg, #22c55e, #16a34a)';
+            
+            setTimeout(() => {
+              window.location.href = 'index.html';
+            }, 800);
+          } else {
+            showNotification('Invalid Credentials', 'Please check your email/username and password.');
+          }
+        }
+      });
+
+      // Handle Enter key in login inputs
+      emailInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') passwordInput.focus();
+      });
+      
+      passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') loginBtn.click();
+      });
+    }); // End DOMContentLoaded
+  </script>
+</body>
+</html>

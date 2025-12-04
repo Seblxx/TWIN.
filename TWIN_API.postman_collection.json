@@ -1,0 +1,529 @@
+{
+  "info": {
+    "name": "TWIN Stock Prediction API",
+    "description": "Complete API collection for TWIN fuzzy matching stock predictions",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health & System",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Supabase Config",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/config",
+              "host": ["{{base_url}}"],
+              "path": ["api", "config"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Fuzzy Matching Tests",
+      "item": [
+        {
+          "name": "Exact Match - Apple",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": \"apple in 4 days\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/predict",
+              "host": ["{{base_url}}"],
+              "path": ["predict"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Typo - aple (should match AAPL)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": \"aple in 4 days\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/predict",
+              "host": ["{{base_url}}"],
+              "path": ["predict"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Typo - microsft (should match MSFT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": \"microsft in 3 days\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/predict",
+              "host": ["{{base_url}}"],
+              "path": ["predict"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Abbreviated - tsl (should match TSLA)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": \"tsl in 5 days\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/predict",
+              "host": ["{{base_url}}"],
+              "path": ["predict"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Multi-word - jp morgan (should match JPM)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": \"jp morgan in 5 days\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/predict",
+              "host": ["{{base_url}}"],
+              "path": ["predict"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Partial - coke (coca cola fuzzy)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": \"coke in 3 days\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/predict",
+              "host": ["{{base_url}}"],
+              "path": ["predict"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Invalid Input - Get Suggestions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": \"blahblah in 2 days\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/predict",
+              "host": ["{{base_url}}"],
+              "path": ["predict"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "TWIN- Basic Predictions",
+      "item": [
+        {
+          "name": "Apple 4 Days",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": \"apple in 4 days\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/predict",
+              "host": ["{{base_url}}"],
+              "path": ["predict"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Microsoft Next Week",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": \"microsoft next week\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/predict",
+              "host": ["{{base_url}}"],
+              "path": ["predict"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Explicit Ticker - $TSLA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": \"$TSLA in 5 days\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/predict",
+              "host": ["{{base_url}}"],
+              "path": ["predict"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tomorrow Shortcut",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": \"nvidia tomorrow\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/predict",
+              "host": ["{{base_url}}"],
+              "path": ["predict"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "TWIN+ Diagnostics",
+      "item": [
+        {
+          "name": "Tesla Full Diagnostics",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": \"tesla in 10 days\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/predict_plus",
+              "host": ["{{base_url}}"],
+              "path": ["predict_plus"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Apple Diagnostics",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": \"apple in 5 days\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/predict_plus",
+              "host": ["{{base_url}}"],
+              "path": ["predict_plus"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "NVIDIA Diagnostics",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": \"nvidia in 7 days\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/predict_plus",
+              "host": ["{{base_url}}"],
+              "path": ["predict_plus"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "TWIN* Ensemble",
+      "item": [
+        {
+          "name": "Microsoft Ensemble",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": \"microsoft in 7 days\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/predict_star",
+              "host": ["{{base_url}}"],
+              "path": ["predict_star"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Amazon Long-term Ensemble",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"input\": \"amazon in 14 days\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/predict_star",
+              "host": ["{{base_url}}"],
+              "path": ["predict_star"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Historical Data",
+      "item": [
+        {
+          "name": "AAPL 90 Days History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/history?ticker=AAPL&days=90",
+              "host": ["{{base_url}}"],
+              "path": ["history"],
+              "query": [
+                {
+                  "key": "ticker",
+                  "value": "AAPL"
+                },
+                {
+                  "key": "days",
+                  "value": "90"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "TSLA 180 Days History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/history?ticker=TSLA&days=180",
+              "host": ["{{base_url}}"],
+              "path": ["history"],
+              "query": [
+                {
+                  "key": "ticker",
+                  "value": "TSLA"
+                },
+                {
+                  "key": "days",
+                  "value": "180"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Backtesting",
+      "item": [
+        {
+          "name": "Backtest AAPL - EMA Drift",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/backtest?ticker=AAPL&k=3&method=ema_drift",
+              "host": ["{{base_url}}"],
+              "path": ["backtest"],
+              "query": [
+                {
+                  "key": "ticker",
+                  "value": "AAPL"
+                },
+                {
+                  "key": "k",
+                  "value": "3"
+                },
+                {
+                  "key": "method",
+                  "value": "ema_drift"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Backtest MSFT - Linear Trend",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/backtest?ticker=MSFT&k=5&method=linear_trend",
+              "host": ["{{base_url}}"],
+              "path": ["backtest"],
+              "query": [
+                {
+                  "key": "ticker",
+                  "value": "MSFT"
+                },
+                {
+                  "key": "k",
+                  "value": "5"
+                },
+                {
+                  "key": "method",
+                  "value": "linear_trend"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

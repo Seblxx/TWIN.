@@ -1,4 +1,3 @@
-
 :root{
   --blue:#233C76;
   --pink:#ff5ea8;
@@ -9,12 +8,24 @@
   --ink-muted:rgba(255,255,255,.75);
   --black: #000000;
 
+  /* Logo gradient - pink to black */
+  --logo-gradient: linear-gradient(135deg, #ff5ea8, #000000);
+
+  /* Intro page colors */
+  --icon-color: linear-gradient(135deg, #48b6ff, #ff5ea8);
+  --primary-gradient: linear-gradient(135deg, #ff5ea8 0%, #48b6ff 100%);
+
   /* Original gradients (kept for TWIN+) */
   --card-grad: linear-gradient(135deg, rgba(35,60,118,.85) 0%, rgba(35,60,118,.65) 100%);
   --card-grad-plus: linear-gradient(135deg, var(--pink-soft) 0%, rgba(255,94,168,.12) 100%);
   --head-glass: rgba(255,255,255,.10);
   --head-glass-plus: rgba(255,94,168,.18);
   --shadow: 0 10px 24px rgba(0,0,0,.25);
+  
+  /* Predictions page variables */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-heavy: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.12);
 }
 
 
@@ -37,7 +48,11 @@ body{
   gap:16px; margin-bottom:16px;
 }
 .brand{display:flex; align-items:center; gap:10px; justify-self:center;}
-.app-title{margin:0; letter-spacing:1px;}
+.app-title{
+  margin:0; 
+  letter-spacing:1px;
+  color: var(--white);
+}
 
 
 .controls{
@@ -69,8 +84,9 @@ body{
   padding:14px 13px; border-radius:10px; border:0; cursor:pointer;
   color:var(--white); font-weight:600;
 }
-.btn-plus{ background: var(--pink); }
-
+/* TWIN+ button - green for dark theme */
+.btn-plus{ background: #22c55e !important; color: #ffffff !important; }
+.plus-btn { background: #22c55e !important; color: #ffffff !important; }
 
 .grid{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
 
@@ -101,7 +117,31 @@ body{
 
 
 .messages .user{ margin:6px 0; font-weight:600; text-align:right; }
-.messages .bot{ margin:10px 0; }
+.messages .bot{ margin:10px 0; position: relative; }
+
+/* Star save button - white icon */
+.star-save-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px 8px;
+  font-size: 18px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  z-index: 10;
+}
+.star-save-btn i {
+  color: #ffffff !important;
+}
+.star-save-btn:hover {
+  transform: scale(1.1);
+}
+.star-save-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
 
 
 .title{ font-weight:800; margin-bottom:.25rem; }
@@ -116,6 +156,8 @@ body{
   background: transparent; color: var(--white); cursor:pointer; font-weight:600;
   min-width:108px; text-align:center;
 }
+.plus-btn{ background: var(--pink) !important; border-color: transparent !important; }
+.back-btn{ background: var(--pink) !important; border-color: transparent !important; }
 
 
 .loading{
@@ -162,7 +204,25 @@ body{
 
 
 .controls .btn-plus { background: var(--pink) !important; }
-.messages .plus-btn { background: var(--pink) !important; border-color: transparent !important; }
+.messages .plus-btn { background: var(--pink) !important; border-color: transparent !important; color:#ffffff !important; }
+
+/* TWIN* button - black with pink text for dark theme */
+.star-btn { 
+  background: #000000 !important; 
+  color: #ff5ea8 !important; 
+  border-color: #000000 !important;
+  padding: 8px 16px !important;
+  font-size: 13px !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  min-width: 108px !important;
+  transition: transform .15s ease, box-shadow .15s ease !important;
+}
+.star-btn:hover { 
+  background: #1a1a1a !important; 
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,.6) !important;
+}
 
 
 @media (max-width: 1100px){
@@ -278,9 +338,63 @@ body{
 .suggest .btn-no:hover,
 .suggest .btn-retry:hover { transform: translateY(-1px); filter: brightness(1.05); }
 
-/* small press effect when clicking (JS toggles .press) */
+ /* small press effect when clicking (JS toggles .press) */
 .suggest .btn-yes.press,
 .suggest .btn-no.press,
 .suggest .btn-retry.press { transform: translateY(0); filter: none; opacity:.9; }
+
+/* Clean menu for dark theme - just text over blur */
+.menu-options {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 520px;
+  min-height: 450px;
+  background: transparent;
+  backdrop-filter: blur(60px) brightness(0.3);
+  -webkit-backdrop-filter: blur(60px) brightness(0.3);
+  color: #fff;
+  border-radius: 32px;
+  box-shadow: none;
+  border: none;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  padding: 56px 40px;
+  gap: 8px;
+  font-family: 'Inter', Arial, sans-serif;
+}
+.menu-options button, .menu-options .menu-option {
+  color: #fff !important;
+  background: transparent;
+  border: none;
+  font-size: 1.95rem;
+  font-family: 'Inter', Arial, sans-serif;
+  font-weight: 900;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  text-align: right;
+  border-radius: 16px;
+  padding: 24px 40px;
+  width: 100%;
+  margin: 0;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+  display: block;
+  cursor: pointer;
+}
+.menu-options button:hover, .menu-options .menu-option:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(-4px);
+}
+.menu-options .menu-option {
+  display: block;
+}
+.menu-options .menu-option:last-child {
+  margin-bottom: 0;
+}
 
 

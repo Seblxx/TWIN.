@@ -1,0 +1,123 @@
+{
+  "info": {
+    "name": "TWIN Predictions - With Suggestions",
+    "description": "Test collection showing suggestions appearing in all responses",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Valid Prediction with Suggestions",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"input\": \"apple in 3 days\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/predict",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["predict"]
+        },
+        "description": "✅ Should show AAPL prediction + 3 suggestions"
+      }
+    },
+    {
+      "name": "2. Typo - 'appel' with Suggestions",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"input\": \"appel in 5 days\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/predict",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["predict"]
+        },
+        "description": "✅ Fuzzy matching detects AAPL + shows 3 suggestions"
+      }
+    },
+    {
+      "name": "3. Typo - 'micrsf' with Suggestions",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"input\": \"micrsf in 1 week\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/predict",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["predict"]
+        },
+        "description": "✅ Fuzzy matching detects MSFT + shows 3 suggestions"
+      }
+    },
+    {
+      "name": "4. Invalid Input - Shows Suggestions",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"input\": \"blahblah in 2 days\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/predict",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["predict"]
+        },
+        "description": "❌ Returns error but STILL shows 3 suggestions"
+      }
+    },
+    {
+      "name": "5. Price Only - With Suggestions",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"input\": \"microsoft\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/predict",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["predict"]
+        },
+        "description": "✅ Price-only mode + shows 3 suggestions"
+      }
+    },
+    {
+      "name": "6. Multi-word Company with Suggestions",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"input\": \"jp morgan in 1 month\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/predict",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["predict"]
+        },
+        "description": "✅ Multi-word company detection + 3 suggestions"
+      }
+    }
+  ]
+}

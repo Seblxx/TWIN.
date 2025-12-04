@@ -3,116 +3,219 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TWIN — Stock Assistant</title>
+  <title>TWIN.</title>
 
+  <!-- Performance optimizations -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="preload" href="dark.css?v=13" as="style">
+  <link rel="preload" href="theme-toggle.js?v=13" as="script">
+  <link rel="preload" href="script.js?v=31" as="script">
+  
   <!-- this will be the default theme -->
-  <link id="themeCss" rel="stylesheet" href="royal.css"/>
+  <link id="themeCss" rel="stylesheet" href="dark.css?v=13"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
-  <script defer src="theme-toggle.js"></script>
-  <script defer src="script.js"></script>
 
   <style>
-  .theme-fab { 
+  /* Prevent flash of unstyled content */
+  html {
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+  
+  /* Notification Modal */
+  .notification-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    z-index: 99999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .notification-overlay.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+  }
+  body[data-theme="light"] .preset-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.4);
+  }
+  
+  body[data-theme="royal"] .notification-modal button,
+  body[data-theme="dark"] .notification-modal button {
+    background: linear-gradient(135deg, #ff5ea8 0%, #ff3366 100%);
+  }
+  
+  body[data-theme="monochrome"] .notification-modal button {
+    background: #22c55e;
+  }
+  
+  body[data-theme="liquidglass"] .notification-modal {
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(30px);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Light theme - black menu icon */
+  body[data-theme="light"] .menu-btn span {
+    background: #000000 !important;
+  }
+  
+  body[data-theme="liquidglass"] .stock-suggestions {
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(30px);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Menu button - bottom right */
+  .menu-fab { 
     position: fixed; 
     right: 24px; 
     bottom: 24px; 
     z-index: 9999; 
-    display: grid; 
-    justify-items: end;
   }
 
-  .theme-btn {
-    width: 52px; 
-    height: 52px; 
+  .menu-btn {
+    width: 48px; 
+    height: 48px; 
     border: 0; 
-    border-radius: 14px; 
+    border-radius: 12px; 
     cursor: pointer;
-
-
     background: transparent;
     backdrop-filter: none;
     box-shadow: none;
-
     display: grid; 
     place-items: center;
-    transition: transform .25s ease, filter .25s ease;
+    transition: transform .25s ease;
   }
 
-  .theme-btn:hover { transform: rotate(180deg); }
+  .menu-btn:hover { 
+    transform: rotate(180deg);
+  }
 
-
-  .theme-btn span { 
+  .menu-btn span { 
     display: block; 
-    width: 28px; 
-    height: 4px; 
+    width: 24px; 
+    height: 3px; 
     margin: 3px 0; 
     background: #fff; 
-    opacity: .95; 
-    border-radius: 3px;
+    border-radius: 2px;
     transition: transform .25s ease, opacity .25s ease;
   }
-
   
-  :root[data-theme="light"] .theme-btn span { background: #000; }
+  .menu-btn.open span:nth-child(1) { transform: rotate(45deg) translateY(9px); }
+  .menu-btn.open span:nth-child(2) { opacity: 0; }
+  .menu-btn.open span:nth-child(3) { transform: rotate(-45deg) translateY(-9px); }
 
-
-  .theme-menu {
-    position: absolute;
-    right: 0;
-    bottom: 64px; /* sit above the FAB */
-    min-width: 260px;
-    padding: 10px;
-    border-radius: 14px;
-    background: rgba(0,0,0,.35);         
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,255,255,.18);
-    box-shadow: 0 12px 28px rgba(0,0,0,.3);
-
-    opacity: 0;
-    transform: translateY(8px) scale(.98);
-    pointer-events: none;
-    transition: opacity .22s ease, transform .22s ease;
-  }
-  .theme-menu.open {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    pointer-events: auto;
-  }
-
-  .menu-group { padding: 6px; }
-  .menu-title {
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: .22px;
-    color: rgba(255,255,255,.85);
-    padding: 4px 6px 6px 6px;
-    text-transform: uppercase;
-  }
-
-  .theme-menu button {
-    width: 100%;
-    text-align: left;
-    padding: 12px 14px;                
-    border: 0;
-    border-radius: 10px;
+  /* Menu panel - just text over blurred background, no glass */
+  .menu-options {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    width: 520px;
+    min-height: 450px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 8px;
     background: transparent;
-    color: #fff;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 15px;
-    letter-spacing: .2px;
-    transition: background .18s ease, transform .12s ease, filter .12s ease;
+    backdrop-filter: blur(60px) brightness(0.3);
+    -webkit-backdrop-filter: blur(60px) brightness(0.3);
+    border-radius: 32px;
+    border: none;
+    box-shadow: none;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 56px 40px;
   }
-  .theme-menu button:hover {
-    background: rgba(255,255,255,.14);
-    transform: translateY(-1px);
-    filter: brightness(1.03);
-  }
-  .theme-menu button:active {
-    transform: translateY(0);
-    filter: none;
+  
+  .menu-options.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
   }
 
+  .menu-options button,
+  .menu-logout-btn {
+    width: 100%;
+    padding: 24px 40px;
+    margin: 0;
+    border: none;
+    background: transparent;
+    font-size: 1.95rem;
+    font-weight: 900;
+    letter-spacing: 3.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: #ffffff;
+    text-align: right;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 16px;
+    position: relative;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+  }
+  
+  .menu-options button:hover,
+  .menu-logout-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(-4px);
+  }
+  
+  .menu-logout-btn {
+    margin-bottom: 12px;
+  }
+  
+  .menu-user-name {
+    padding: 16px 32px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    margin-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Theme toggle circle - top left */
+  .theme-toggle-circle {
+    position: fixed;
+    left: 24px;
+    top: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.3);
+    cursor: pointer;
+    transition: all .25s ease;
+    z-index: 9999;
+    box-shadow: 0 4px 16px rgba(0,0,0,.3);
+  }
+  .theme-toggle-circle:hover {
+    transform: scale(1.1);
+    border-color: rgba(255,255,255,.5);
+    box-shadow: 0 6px 24px rgba(0,0,0,.4);
+  }
   
   .modal-overlay {
     position: fixed;
@@ -168,24 +271,312 @@
     transition: filter .18s ease, transform .12s ease;
   }
   .modal-close:hover { filter: brightness(1.05); transform: translateY(-1px); }
+  
+  /* Stock Suggestions Dropdown */
+  .stock-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    margin-top: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    animation: slideDown 0.3s ease;
+  }
+  
+  .stock-suggestions::-webkit-scrollbar {
+    display: none;
+  }
+  
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .suggestions-header {
+    padding: 12px 16px;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    opacity: 0.6;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .stock-card {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .stock-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(4px);
+  }
+  
+  .stock-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-right: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .stock-info {
+    flex: 1;
+  }
+  
+  .stock-name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+  
+  .stock-ticker {
+    font-size: 11px;
+    opacity: 0.6;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Duration Presets */
+  .duration-presets {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .preset-label {
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0.7;
+    margin-right: 8px;
+  }
+  
+  .preset-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .preset-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .preset-btn:active {
+    transform: translateY(0);
+  }
+  
+  /* Theme-specific modal styles */
+  body[data-theme=\"light\"] .notification-modal {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #1b2742;
+  }
+  
+  body[data-theme=\"light\"] .notification-modal h3 {
+    color: #1b2742;
+  }
+  
+  body[data-theme=\"light\"] .notification-modal p {
+    color: rgba(27, 39, 66, 0.8);
+  }
+  
+  body[data-theme=\"light\"] .notification-modal button {
+    background: linear-gradient(135deg, #B9A2E5 0%, #9b7fcf 100%);
+  }
+  
+  body[data-theme=\"light\"] .stock-suggestions {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: #1b2742;
+  }
+  
+  body[data-theme=\"light\"] .stock-name,
+  body[data-theme=\"light\"] .stock-ticker {
+    color: #1b2742;
+  }
+  
+  body[data-theme=\"light\"] .stock-card:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  
+  body[data-theme=\"light\"] .preset-btn {
+    border-color: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.05);
+    color: #1b2742;
+  }
+  
+  body[data-theme=\"light\"] .preset-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.4);
+  }
+  
+  body[data-theme=\"royal\"] .notification-modal button,
+  body[data-theme=\"dark\"] .notification-modal button {
+    background: linear-gradient(135deg, #ff5ea8 0%, #ff3366 100%);
+  }
+  
+  body[data-theme=\"monochrome\"] .notification-modal button {
+    background: #22c55e;
+  }
+  
+  body[data-theme=\"liquidglass\"] .notification-modal {
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(30px);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  body[data-theme=\"liquidglass\"] .stock-suggestions {
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(30px);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Menu overlay - behind the menu options */
+  .menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: none;
+    z-index: 9998;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .menu-overlay.open {
+    display: block;
+    opacity: 1;
+  }
 </style>
 
 </head>
 <body>
+  <script>
+    // Apply theme-specific classes to body on load
+    document.addEventListener('DOMContentLoaded', () => {
+      const theme = localStorage.getItem('twin_theme_css') || 'dark.css';
+      const themeName = theme.replace('.css', '');
+      document.body.setAttribute('data-theme', themeName);
+      
+      // Load predictions on page load to enable PREDICTIONS button
+      if (window.getSavedPredictions) {
+        window.getSavedPredictions().then(predictions => {
+          console.log(`Loaded ${predictions.length} predictions from database`);
+          // This will enable the PREDICTIONS button if predictions exist
+        }).catch(err => {
+          console.error('Failed to load predictions:', err);
+        });
+      }
+      
+      // Update on theme change  
+      setInterval(() => {
+        const currentTheme = localStorage.getItem('twin_theme_css') || 'dark.css';
+        const currentThemeName = currentTheme.replace('.css', '');
+        if (document.body.getAttribute('data-theme') !== currentThemeName) {
+          document.body.setAttribute('data-theme', currentThemeName);
+        }
+      }, 500);
+    });
+  </script>
   <div class="shell">
     <div class="topbar">
       <div class="controls">
-        <div class="input-group">
+        <div class="input-group" style="position: relative;">
           <input
             id="userInput"
             type="text"
             placeholder="Enter a stock and a duration to receive a prediction e.g., Apple in 3 days, NVDA next week"
           /> 
           <button class="btn-both-inside" onclick="sendTwin()">TWIN</button>
+          
+          <!-- Stock Suggestions Dropdown -->
+          <div id="stockSuggestions" class="stock-suggestions" style="display: none;">
+            <div class="suggestions-header">Popular Stocks</div>
+            <div class="stock-card" onclick="selectStock('Apple', 'AAPL')">
+              <div class="stock-info">
+                <div class="stock-name">Apple Inc.</div>
+                <div class="stock-ticker">AAPL</div>
+              </div>
+            </div>
+            <div class="stock-card" onclick="selectStock('Tesla', 'TSLA')">
+            
+              <div class="stock-info">
+                <div class="stock-name">Tesla Inc.</div>
+                <div class="stock-ticker">TSLA</div>
+              </div>
+            </div>
+            <div class="stock-card" onclick="selectStock('Microsoft', 'MSFT')">
+              <div class="stock-info">
+                <div class="stock-name">Microsoft Corp.</div>
+                <div class="stock-ticker">MSFT</div>
+              </div>
+            </div>
+            <div class="stock-card" onclick="selectStock('NVIDIA', 'NVDA')">
+              <div class="stock-info">
+                <div class="stock-name">NVIDIA Corp.</div>
+                <div class="stock-ticker">NVDA</div>
+              </div>
+            </div>
+            <div class="stock-card" onclick="selectStock('Amazon', 'AMZN')">
+              
+              <div class="stock-info">
+                <div class="stock-name">Amazon.com Inc.</div>
+                <div class="stock-ticker">AMZN</div>
+              </div>
+            </div>
+            <div class="stock-card" onclick="selectStock('Google', 'GOOGL')">
+              
+              <div class="stock-info">
+                <div class="stock-name">Alphabet Inc.</div>
+                <div class="stock-ticker">GOOGL</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Duration Presets -->
+          <div id="durationPresets" class="duration-presets" style="display: none;">
+            <div class="preset-label">Quick select duration:</div>
+            <button class="preset-btn" onclick="selectDuration('3 days')">3 days</button>
+            <button class="preset-btn" onclick="selectDuration('1 week')">1 week</button>
+            <button class="preset-btn" onclick="selectDuration('2 weeks')">2 weeks</button>
+            <button class="preset-btn" onclick="selectDuration('1 month')">1 month</button>
+            <button class="preset-btn" onclick="selectDuration('3 months')">3 months</button>
+          </div>
         </div>
         <button class="btn btn-plus" onclick="sendBasic()">Analyze with TWIN-</button>
       </div>
-      <div class="brand">
+      <div class="brand" style="display: flex; align-items: center; gap: 10px;">
         <h1 class="app-title">TWIN.</h1>
         <i class="fas fa-chart-line"></i>
       </div>
@@ -203,11 +594,11 @@
         </div>
       </section>
 
-    
+<!-- TWIN PLUS SECTION -->
       <section class="card card-plus">
         <header class="card-head card-head-plus">
           <h2>TWIN+</h2>
-          <p class="muted">Deeper diagnostics</p>
+          <p class="muted">ML + Diagnostics</p>
         </header>
         <div class="chatbox big">
           <div id="messages-plus" class="messages"></div>
@@ -217,26 +608,29 @@
   </div>
 
 
-  <div class="theme-fab">
-    <button id="themeBtn" class="theme-btn" aria-label="Menu" aria-expanded="false">
+  <!-- Theme toggle circle -->
+  <div id="themeToggle" class="theme-toggle-circle"></div>
+
+  <!-- Menu options - slide in from right -->
+  <div id="menuOptions" class="menu-options">
+    <button id="logoutBtn" class="menu-logout-btn" style="display: none;">LOGOUT</button>
+    <div id="menuUserName" class="menu-user-name" style="display: none;"></div>
+    <button id="menuHome" style="font-size:2.5rem;">LOGOUT</button>
+    <button id="menuNew" style="font-size:2.5rem;">CLEAR</button>
+    <button id="menuPredictions" style="font-size:2.5rem;">PREDICTIONS</button>
+    <button id="menuWhatIs" style="font-size:2.5rem;">What is TWIN?</button>
+    <button id="menuHowTo" style="font-size:2.5rem;">How to use?</button>
+  </div>
+
+  <!-- Menu button -->
+  <div class="menu-fab">
+    <button id="menuBtn" class="menu-btn" aria-label="Menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
-    <div id="themeMenu" class="theme-menu">
-      <div class="menu-group">
-        <div class="menu-title">Actions</div>
-        <button id="menuNew">CLEAR</button>
-        <button id="menuWhatIs">What is TWIN?</button>
-        <button id="menuHowTo">How to use?</button>
-      </div>
-      <div class="menu-group">
-        <div class="menu-title">Themes</div>
-        <button data-css="royal.css">ROYAL</button>
-        <button data-css="dark.css">DARK</button>
-        <button data-css="light.css">LIGHT</button>
-        <button data-css="monochrome.css">MONOCHROME</button>
-      </div>
-    </div>
   </div>
+
+  <!-- Menu overlay for click-to-close -->
+  <div id="menuOverlay" class="menu-overlay"></div>
 
 
   <div id="modalOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
@@ -248,6 +642,27 @@
       <div id="modalBody" class="modal-body"></div>
     </div>
   </div>
+
+
+  <!-- Load scripts at the end so onclick handlers work -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Initialize Supabase client for auth management
+    window.supabaseClient = null;
+    
+    fetch('/api/config')
+      .then(res => res.json())
+      .then(config => {
+        if (config.supabaseUrl && config.supabaseUrl !== 'YOUR_SUPABASE_URL_HERE') {
+          window.supabaseClient = supabase.createClient(config.supabaseUrl, config.supabaseKey);
+          console.log('Supabase client initialized');
+        }
+      })
+      .catch(err => console.error('Failed to load Supabase config:', err));
+  </script>
+  <script src="theme-toggle.js?v=14"></script>
+  <script src="script.js?v=31"></script>
+  <script>document.addEventListener('DOMContentLoaded', function(){ if(window.initMenu) window.initMenu(); });</script>
 </body>
 </html>
 

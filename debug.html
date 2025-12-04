@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick TWIN Test</title>
+</head>
+<body>
+    <h1>Quick Function Test</h1>
+    <p>Open browser console (F12) to see debug messages</p>
+    
+    <input type="text" id="userInput" value="AAPL in 3 days" style="width: 300px; padding: 8px;">
+    <br><br>
+    
+    <button onclick="testButtons()">Test All Buttons</button>
+    <br><br>
+    
+    <div id="messages-basic" style="border: 1px solid #ccc; padding: 10px; margin: 10px 0; min-height: 100px;">
+        <h3>TWIN- Results:</h3>
+    </div>
+    
+    <div id="messages-plus" style="border: 1px solid #ccc; padding: 10px; margin: 10px 0; min-height: 100px;">
+        <h3>TWIN+ Results:</h3>
+    </div>
+
+    <script>
+        function testButtons() {
+            console.log('Testing all functions...');
+            
+            // Test if functions exist
+            console.log('sendBasic exists:', typeof window.sendBasic);
+            console.log('sendPlus exists:', typeof window.sendPlus);
+            console.log('sendTwin exists:', typeof window.sendTwin);
+            
+            // Test calling them
+            if (typeof window.sendBasic === 'function') {
+                console.log('Calling sendBasic...');
+                window.sendBasic();
+            }
+            
+            setTimeout(() => {
+                if (typeof window.sendPlus === 'function') {
+                    console.log('Calling sendPlus...');
+                    window.sendPlus();
+                }
+            }, 2000);
+        }
+        
+        // Mock functions for testing if the script doesn't load
+        function fade(el) { return el; }
+        function addLoading(container) {
+            const l = document.createElement('div');
+            l.innerHTML = 'Loading...';
+            container.appendChild(l);
+            return l;
+        }
+        function scrollDown() {}
+    </script>
+    
+    <!-- Load your actual script -->
+    <script src="script.js"></script>
+</body>
+</html>
