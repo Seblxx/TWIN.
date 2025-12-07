@@ -281,13 +281,15 @@
       // Update button state based on login and saved predictions
       function updatePredictionsButton() {
         const isLoggedIn = localStorage.getItem('twin_user_logged_in') === 'true';
+        // Always show the button, just disable it when not logged in or no predictions
+        predsBtn.style.display = '';
+        
         if (!isLoggedIn) {
-          // Hide button when not logged in
-          predsBtn.style.display = 'none';
+          // Dim and disable when not logged in
+          predsBtn.style.opacity = '0.4';
+          predsBtn.style.cursor = 'not-allowed';
+          predsBtn.disabled = true;
         } else {
-          // Show button when logged in
-          predsBtn.style.display = '';
-          
           // Check if there are saved predictions (from database or localStorage)
           if (window.getSavedPredictions) {
             window.getSavedPredictions().then(predictions => {

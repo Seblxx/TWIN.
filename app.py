@@ -1221,14 +1221,11 @@ def clear_all_predictions():
 def static_files(filename):
     """Serve static files (HTML, CSS, JS)"""
     response = send_from_directory('.', filename)
-    # Add no-cache headers for HTML files to prevent white screen issues
-    if filename.endswith('.html'):
+    # Add no-cache headers for HTML, CSS, and JS files during development
+    if filename.endswith('.html') or filename.endswith(('.css', '.js')):
         response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
         response.headers['Pragma'] = 'no-cache'
         response.headers['Expires'] = '0'
-    # Cache CSS and JS files for better performance
-    elif filename.endswith(('.css', '.js')):
-        response.headers['Cache-Control'] = 'public, max-age=31536000'
     return response
 
 if __name__ == "__main__":

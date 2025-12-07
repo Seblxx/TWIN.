@@ -1,4 +1,4 @@
-// Predictions.js - Complete rebuild
+// Predictions.js - Card expansion and feedback system
 const THEMES = [
   { name: 'Royal', file: 'royal.css', color: 'linear-gradient(135deg, #1e3a8a, #3b82f6)' },
   { name: 'Dark', file: 'dark.css', color: '#1a1a2e' },
@@ -8,7 +8,7 @@ const THEMES = [
 ];
 
 let currentThemeIndex = 0;
-let selectedPredictionId = null;
+let currentPredictions = [];
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
   loadPredictions();
   setupEventListeners();
   console.log('Predictions page initialized');
-  console.log('Saved predictions:', getPredictions());
 });
 
 // Theme Management
@@ -93,30 +92,34 @@ async function getPredictions() {
   }
 }
 
-// Save predictions to localStorage (for guest users only)
-function savePredictions(predictions) {
-  try {
-    localStorage.setItem('twin_predictions', JSON.stringify(predictions));
-  } catch (e) {
-    console.error('Failed to save predictions:', e);
-  }
+// Format timestamp
+function formatTimestamp(timestamp) {
+  const date = new Date(timestamp);
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'p.m.' : 'a.m.';
+  const displayHours = hours % 12 || 12;
+  
+  return `${date.getFullYear()}-${month}-${day}<br>${displayHours}:${minutes} ${ampm}`;
 }
 
 // Load and display predictions
 async function loadPredictions() {
-  const predictions = await getPredictions();
+  currentPredictions = await getPredictions();
   const list = document.getElementById('predictionsList');
   const countEl = document.getElementById('predictionsCount');
   
   console.log('Loading predictions...');
   console.log('Raw localStorage:', localStorage.getItem('twin_predictions'));
-  console.log('Parsed predictions:', predictions);
-  console.log('Number of predictions:', predictions.length);
+  console.log('Parsed predictions:', currentPredictions);
+  console.log('Number of predictions:', currentPredictions.length);
   
   // Update count
-  countEl.textContent = `${predictions.length} PREDICTION${predictions.length !== 1 ? 'S' : ''}`;
+  countEl.textContent = `${currentPredictions.length} PREDICTION${currentPredictions.length !== 1 ? 'S' : ''}`;
   
-  if (predictions.length === 0) {
+  if (currentPredictions.length === 0) {
     list.innerHTML = `
       <div class="empty-state">
         <i class="fas fa-chart-line"></i>
@@ -127,42 +130,14 @@ async function loadPredictions() {
     return;
   }
 
-  list.innerHTML = predictions.map((pred, index) => {
-    console.log(`Rendering prediction ${index}:`, pred);
-    const change = pred.predictedPrice - pred.lastClose;
-    const changePercent = ((change / pred.lastClose) * 100).toFixed(2);
-    const isPositive = change > 0;
-    
-    let feedbackHTML = '';
-    if (pred.feedback) {
-      if (pred.feedback === 'accurate') {
-        feedbackHTML = '<div class="feedback-result accurate">✓ Marked accurate</div>';
-      } else {
-        feedbackHTML = '<div class="feedback-result inaccurate">✗ Marked inaccurate</div>';
-      }
-    } else {
-      feedbackHTML = `
-        <div class="feedback-btns">
-          <button class="feedback-btn yes" onclick="submitFeedback(${index}, 'accurate')">
-            <i class="fas fa-check"></i> Accurate
-          </button>
-          <button class="feedback-btn no" onclick="submitFeedback(${index}, 'inaccurate')">
-            <i class="fas fa-times"></i> Inaccurate
-          </button>
-        </div>
-      `;
-    }
-    
+  // Render compact cards (ticker, duration, current price, predicted price only)
+  list.innerHTML = currentPredictions.map((pred, index) => {
     return `
-      <div class="prediction-item" data-index="${index}">
+      <div class="prediction-item" onclick="expandPrediction(${index})">
         <div class="item-header">
           <div class="item-left">
             <div class="stock-symbol">${pred.stock}</div>
             <div class="duration-badge">${pred.duration}</div>
-          </div>
-          <div class="item-right">
-            <div class="timestamp">${formatDate(pred.timestamp)}</div>
-            <div class="method-badge">${pred.method}</div>
           </div>
         </div>
         
@@ -175,118 +150,342 @@ async function loadPredictions() {
             <div class="stat-label">PREDICTED</div>
             <div class="stat-value">$${pred.predictedPrice.toFixed(2)}</div>
           </div>
-          <div class="stat-item">
-            <div class="stat-label">CHANGE</div>
-            <div class="stat-value ${isPositive ? 'positive' : 'negative'}">
-              ${isPositive ? '+' : ''}${change.toFixed(2)} (${isPositive ? '+' : ''}${changePercent}%)
-            </div>
-          </div>
-        </div>
-        
-        <div class="item-details">
-          <div class="feedback-section">
-            <div class="feedback-title">WAS THIS ACCURATE?</div>
-            ${feedbackHTML}
-          </div>
         </div>
       </div>
     `;
   }).join('');
-
-  // Add click handlers to toggle expanded state
-  document.querySelectorAll('.prediction-item').forEach(item => {
-    item.addEventListener('click', () => {
-      item.classList.toggle('expanded');
-    });
-  });
 }
 
-// Submit feedback
-function submitFeedback(index, feedback) {
-  const predictions = getPredictions();
-  if (!predictions[index]) return;
+// Expand prediction with detailed view and feedback options
+function expandPrediction(index) {
+  const pred = currentPredictions[index];
+  if (!pred) return;
 
-  predictions[index].feedback = feedback;
-  savePredictions(predictions);
-  loadPredictions(); // Refresh display
-}
+  const change = pred.predictedPrice - pred.lastClose;
+  const changePercent = ((change / pred.lastClose) * 100).toFixed(2);
+  const isPositive = change >= 0;
 
-// Format date
-function formatDate(timestamp) {
-  const date = new Date(timestamp);
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = date.getHours();
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const ampm = hours >= 12 ? 'p.m.' : 'a.m.';
-  const displayHours = hours % 12 || 12;
+  const overlay = document.getElementById('expansionOverlay');
   
-  return `${date.getFullYear()}-${month}-${day} ${displayHours}:${minutes} ${ampm}`;
+  // Create expanded card HTML
+  const expandedHTML = `
+    <div class="expanded-card">
+      <button class="close-btn" onclick="closeExpansion()">
+        <i class="fas fa-times"></i>
+      </button>
+      
+      <div class="expanded-header">
+        <div class="stock-symbol">${pred.stock}</div>
+        <div class="duration-badge">${pred.duration}</div>
+      </div>
+      
+      <div class="expanded-stats">
+        <div class="expanded-stat">
+          <div class="expanded-stat-label">CURRENT PRICE</div>
+          <div class="expanded-stat-value">$${pred.lastClose.toFixed(2)}</div>
+        </div>
+        <div class="expanded-stat">
+          <div class="expanded-stat-label">PREDICTED PRICE</div>
+          <div class="expanded-stat-value">$${pred.predictedPrice.toFixed(2)}</div>
+          <div class="change-indicator ${isPositive ? 'positive' : 'negative'}">
+            ${isPositive ? '+' : ''}$${Math.abs(change).toFixed(2)} (${isPositive ? '+' : ''}${changePercent}%)
+          </div>
+        </div>
+      </div>
+      
+      <div class="expanded-stats">
+        <div class="expanded-stat">
+          <div class="expanded-stat-label">METHOD</div>
+          <div class="expanded-stat-value" style="font-size: 16px; text-transform: uppercase;">${pred.method || 'ema_drift'}</div>
+        </div>
+        <div class="expanded-stat">
+          <div class="expanded-stat-label">CREATED</div>
+          <div class="expanded-stat-value" style="font-size: 14px;">${new Date(pred.timestamp).toLocaleDateString()}</div>
+        </div>
+      </div>
+      
+      ${pred.feedback ? renderFeedbackResult(pred.feedback) : renderFeedbackButtons(index)}
+      
+      <button class="delete-btn" onclick="deletePrediction(${index}); event.stopPropagation();" style="width: 48px; height: 48px; margin: 16px auto 0; padding: 0; font-size: 16px; display: flex; align-items: center; justify-content: center;" title="Delete Prediction">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+  `;
+  
+  overlay.innerHTML = expandedHTML;
+  overlay.classList.add('show');
+  
+  // Prevent body scrolling
+  document.body.style.overflow = 'hidden';
+}
+
+// Render feedback buttons
+function renderFeedbackButtons(index) {
+  return `
+    <div class="feedback-section">
+      <div class="feedback-title">Was this prediction accurate?</div>
+      <div class="feedback-btns">
+        <button class="feedback-btn yes" onclick="handleFeedback(${index}, 'accurate'); event.stopPropagation();">
+          <i class="fas fa-check"></i> YES, ACCURATE
+        </button>
+        <button class="feedback-btn no" onclick="promptInaccuracy(${index}); event.stopPropagation();">
+          <i class="fas fa-times"></i> NO, INACCURATE
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Render feedback result
+function renderFeedbackResult(feedback) {
+  if (feedback === 'accurate') {
+    return `
+      <div class="feedback-section">
+        <div style="text-align: center; padding: 20px; background: var(--head-glass, rgba(72,182,255,0.15)); border-radius: 12px; border: 1px solid rgba(72,182,255,0.3);">
+          <i class="fas fa-check-circle" style="font-size: 32px; color: #4ade80; margin-bottom: 8px;"></i>
+          <div style="font-size: 14px; font-weight: 700; color: var(--ink, #fff); opacity: 0.9;">Marked as Accurate</div>
+        </div>
+      </div>
+    `;
+  } else {
+    return `
+      <div class="feedback-section">
+        <div style="text-align: center; padding: 20px; background: var(--glass-bg, rgba(255,255,255,0.05)); border-radius: 12px; border: 1px solid var(--glass-border, rgba(255,255,255,0.2));">
+          <i class="fas fa-times-circle" style="font-size: 32px; color: #f87171; margin-bottom: 8px;"></i>
+          <div style="font-size: 14px; font-weight: 700; color: var(--ink, #fff); opacity: 0.7;">Marked as Inaccurate</div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// Handle accurate feedback
+function handleFeedback(index, feedback) {
+  submitFeedback(index, feedback, null);
+  showFeedbackModal('Thank you for verifying our model!', 'Your feedback helps us improve prediction accuracy.');
+  closeExpansion();
+}
+
+// Prompt for inaccuracy details
+function promptInaccuracy(index) {
+  const pred = currentPredictions[index];
+  const overlay = document.getElementById('expansionOverlay');
+  
+  // Replace feedback section with inaccuracy input
+  const feedbackSection = overlay.querySelector('.feedback-section');
+  feedbackSection.innerHTML = `
+    <div class="feedback-title">How inaccurate was it?</div>
+    <div class="inaccuracy-section">
+      <label>Actual Price (optional)</label>
+      <input type="number" step="0.01" id="actualPrice" placeholder="Enter actual price" />
+      <button class="submit-feedback-btn" onclick="submitInaccuracy(${index}); event.stopPropagation();">
+        SUBMIT FEEDBACK
+      </button>
+    </div>
+    <button class="feedback-btn no" onclick="expandPrediction(${index}); event.stopPropagation();" style="margin-top: 12px;">
+      <i class="fas fa-arrow-left"></i> BACK
+    </button>
+  `;
+}
+
+// Submit inaccuracy feedback
+function submitInaccuracy(index) {
+  const actualPrice = document.getElementById('actualPrice').value;
+  submitFeedback(index, 'inaccurate', actualPrice ? parseFloat(actualPrice) : null);
+  showFeedbackModal('Thank you for strengthening our model!', 'Your feedback helps us improve future predictions.');
+  closeExpansion();
+}
+
+// Submit feedback to backend
+async function submitFeedback(index, feedback, actualPrice = null) {
+  const pred = currentPredictions[index];
+  if (!pred) return;
+
+  const token = localStorage.getItem('twin_supabase_token');
+  
+  if (token) {
+    try {
+      const response = await fetch('/save_feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          prediction_id: pred.id,
+          feedback: feedback,
+          actual_price: actualPrice
+        })
+      });
+      
+      if (response.ok) {
+        console.log('Feedback saved to backend');
+      }
+    } catch (error) {
+      console.error('Error saving feedback:', error);
+    }
+  }
+  
+  // Update local state
+  currentPredictions[index].feedback = feedback;
+  if (actualPrice) {
+    currentPredictions[index].actualPrice = actualPrice;
+  }
+  
+  // Update localStorage for guest users
+  const userEmail = localStorage.getItem('twin_user_email') || 'guest';
+  if (userEmail === 'guest') {
+    localStorage.setItem('twin_predictions', JSON.stringify(currentPredictions));
+  }
+  
+  loadPredictions();
+}
+
+// Show feedback modal
+function showFeedbackModal(title, message) {
+  const overlay = document.getElementById('feedbackModalOverlay');
+  const titleEl = document.getElementById('feedbackModalTitle');
+  const messageEl = document.getElementById('feedbackModalMessage');
+  
+  titleEl.textContent = title;
+  messageEl.textContent = message;
+  overlay.classList.add('show');
+}
+
+// Close expansion
+function closeExpansion() {
+  const overlay = document.getElementById('expansionOverlay');
+  overlay.classList.remove('show');
+  overlay.innerHTML = '';
+  document.body.style.overflow = '';
+}
+
+// Delete prediction
+async function deletePrediction(index) {
+  const pred = currentPredictions[index];
+  if (!pred) return;
+
+  const token = localStorage.getItem('twin_supabase_token');
+  
+  if (token) {
+    try {
+      const response = await fetch(`/api/predictions/delete/${pred.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        console.log('Prediction deleted from backend');
+      }
+    } catch (error) {
+      console.error('Error deleting prediction:', error);
+    }
+  }
+  
+  // Remove from local state
+  currentPredictions.splice(index, 1);
+  
+  // Update localStorage for guest users
+  const userEmail = localStorage.getItem('twin_user_email') || 'guest';
+  if (userEmail === 'guest') {
+    localStorage.setItem('twin_predictions', JSON.stringify(currentPredictions));
+  }
+  
+  closeExpansion();
+  loadPredictions();
 }
 
 // Clear all predictions
-function clearAllPredictions() {
-  // Use the shared modal system from theme-toggle.js
-  if (typeof window.showConfirmModal === 'function') {
-    window.showConfirmModal(
-      'Clear All Predictions?',
-      'This will permanently delete all your saved predictions.',
-      () => {
-        const token = localStorage.getItem('twin_supabase_token');
-        
-        if (token) {
-          // Delete from backend
-          fetch('/api/predictions/clear', {
-            method: 'DELETE',
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error(`Server error: ${response.status}`);
-            }
-            return response.json();
-          })
-          .then(data => {
-            if (data.success) {
-              console.log('Predictions cleared from database');
-              loadPredictions();
-            } else {
-              // Backend returned error, clear localStorage as fallback
-              console.warn('Backend failed, clearing localStorage');
-              localStorage.removeItem('twin_predictions');
-              selectedPredictionId = null;
-              loadPredictions();
-            }
-          })
-          .catch(error => {
-            console.error('Error clearing predictions:', error);
-            // Fallback to localStorage
-            localStorage.removeItem('twin_predictions');
-            selectedPredictionId = null;
-            loadPredictions();
-          });
-        } else {
-          // Clear from localStorage only
-          localStorage.removeItem('twin_predictions');
-          selectedPredictionId = null;
-          loadPredictions();
+async function clearAllPredictions() {
+  const modal = document.getElementById('clearAllModalOverlay');
+  modal.classList.add('show');
+}
+
+// Confirm clear all
+async function confirmClearAll() {
+  const token = localStorage.getItem('twin_supabase_token');
+  
+  if (token) {
+    try {
+      const response = await fetch('/api/predictions/clear', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to clear predictions');
       }
-    );
-  } else {
-    // Fallback to confirm dialog
-    if (confirm('Are you sure you want to clear all predictions?')) {
-      localStorage.removeItem('twin_predictions');
-      selectedPredictionId = null;
-      loadPredictions();
+      
+      console.log('All predictions cleared from backend');
+    } catch (error) {
+      console.error('Error clearing predictions:', error);
+      alert('Failed to clear predictions. Please try again.');
+      cancelClearAll();
+      return;
     }
   }
+  
+  // Clear local storage
+  localStorage.removeItem('twin_predictions');
+  cancelClearAll();
+  await loadPredictions();
+}
+
+// Cancel clear all
+function cancelClearAll() {
+  const modal = document.getElementById('clearAllModalOverlay');
+  modal.classList.remove('show');
+}
+
+// Close feedback modal
+function closeFeedbackModal() {
+  const overlay = document.getElementById('feedbackModalOverlay');
+  overlay.classList.remove('show');
+}
+
+// Logout function
+function logout() {
+  // Clear all auth data
+  localStorage.removeItem('twin_supabase_token');
+  localStorage.removeItem('twin_user_email');
+  localStorage.removeItem('twin_predictions');
+  
+  // Redirect to intro page
+  window.location.href = 'intro.html';
 }
 
 // Setup event listeners
 function setupEventListeners() {
-  document.getElementById('themeToggle').addEventListener('click', cycleTheme);
+  document.getElementById('logoutBtn').addEventListener('click', logout);
   document.getElementById('clearAllBtn').addEventListener('click', clearAllPredictions);
+  document.getElementById('confirmClearAllBtn').addEventListener('click', confirmClearAll);
+  document.getElementById('cancelClearAllBtn').addEventListener('click', cancelClearAll);
+  document.getElementById('closeFeedbackModalBtn').addEventListener('click', closeFeedbackModal);
+  
+  // Close expansion when clicking overlay background
+  document.getElementById('expansionOverlay').addEventListener('click', function(e) {
+    if (e.target.id === 'expansionOverlay') {
+      closeExpansion();
+    }
+  });
+  
+  // Close modals when clicking overlay background
+  document.getElementById('feedbackModalOverlay').addEventListener('click', function(e) {
+    if (e.target.id === 'feedbackModalOverlay') {
+      closeFeedbackModal();
+    }
+  });
+  
+  document.getElementById('clearAllModalOverlay').addEventListener('click', function(e) {
+    if (e.target.id === 'clearAllModalOverlay') {
+      cancelClearAll();
+    }
+  });
 }
+
+// Initialize
+setupEventListeners();

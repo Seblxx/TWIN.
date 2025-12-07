@@ -122,79 +122,74 @@
   .menu-btn.open span:nth-child(2) { opacity: 0; }
   .menu-btn.open span:nth-child(3) { transform: rotate(-45deg) translateY(-9px); }
 
-  /* Menu panel - just text over blurred background, no glass */
+  /* Menu panel - minimal text only, right above menu button */
   .menu-options {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0.95);
-    width: 520px;
-    min-height: 450px;
+    bottom: 80px;
+    right: 24px;
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    justify-content: center;
-    gap: 8px;
+    align-items: flex-end;
+    justify-content: flex-start;
+    gap: 32px;
     background: transparent;
-    backdrop-filter: blur(60px) brightness(0.3);
-    -webkit-backdrop-filter: blur(60px) brightness(0.3);
-    border-radius: 32px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-radius: 0;
     border: none;
     box-shadow: none;
     z-index: 10000;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), 
-                transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    padding: 56px 40px;
+    transition: opacity 0.2s ease;
+    padding: 0;
   }
   
   .menu-options.open {
     opacity: 1;
     pointer-events: auto;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translateY(0);
   }
 
   .menu-options button,
   .menu-logout-btn {
-    width: 100%;
-    padding: 24px 40px;
+    padding: 0;
     margin: 0;
     border: none;
     background: transparent;
-    font-size: 1.95rem;
-    font-weight: 900;
-    letter-spacing: 3.5px;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
     text-transform: uppercase;
     cursor: pointer;
-    color: #ffffff;
+    color: var(--ink, #ffffff);
     text-align: right;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 16px;
+    transition: all 0.2s ease;
+    border-radius: 0;
     position: relative;
-    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+    white-space: nowrap;
   }
   
   .menu-options button:hover,
   .menu-logout-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    transform: translateX(-4px);
+    opacity: 0.7;
+    transform: translateX(-2px);
   }
   
   .menu-logout-btn {
-    margin-bottom: 12px;
+    margin-bottom: 20px;
   }
   
   .menu-user-name {
-    padding: 16px 32px;
-    font-size: 11px;
+    padding: 0;
+    font-size: 10px;
     font-weight: 700;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.5);
-    text-align: center;
-    margin-bottom: 24px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--ink, rgba(255, 255, 255, 0.5));
+    opacity: 0.5;
+    text-align: right;
+    margin-bottom: 20px;
   }
 
   /* Theme toggle circle - top left */
@@ -361,6 +356,7 @@
     margin-top: 12px;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: flex-start;
     animation: fadeIn 0.3s ease;
   }
   
@@ -381,16 +377,24 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
+    min-width: fit-content;
+    max-width: fit-content;
+    width: auto;
+    white-space: nowrap;
+    flex-shrink: 0;
+    flex-grow: 0;
   }
   
   .preset-btn:hover {
     background: rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.4);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transform: none !important;
+    scale: 1 !important;
   }
   
   .preset-btn:active {
-    transform: translateY(0);
+    transform: translateY(0) !important;
   }
   
   /* Theme-specific modal styles */
@@ -466,8 +470,8 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
+    background: transparent;
+    backdrop-filter: none;
     display: none;
     z-index: 9998;
     opacity: 0;
@@ -615,11 +619,10 @@
   <div id="menuOptions" class="menu-options">
     <button id="logoutBtn" class="menu-logout-btn" style="display: none;">LOGOUT</button>
     <div id="menuUserName" class="menu-user-name" style="display: none;"></div>
-    <button id="menuHome" style="font-size:2.5rem;">LOGOUT</button>
-    <button id="menuNew" style="font-size:2.5rem;">CLEAR</button>
-    <button id="menuPredictions" style="font-size:2.5rem;">PREDICTIONS</button>
-    <button id="menuWhatIs" style="font-size:2.5rem;">What is TWIN?</button>
-    <button id="menuHowTo" style="font-size:2.5rem;">How to use?</button>
+    <button id="menuNew">CLEAR</button>
+    <button id="menuPredictions">PREDICTIONS</button>
+    <button id="menuHowTo">HOW TO USE</button>
+    <button id="menuWhatIs">TWIN?</button>
   </div>
 
   <!-- Menu button -->
