@@ -1,3 +1,37 @@
+/* FORCE stock-suggestions dropdown to white in light mode */
+body[data-theme="light"] #stockSuggestions,
+body[data-theme="light"] .stock-suggestions {
+  background: #fff !important;
+  color: #111 !important;
+  border: 1px solid #bbb !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.10) !important;
+}
+body[data-theme="light"] .stock-card,
+body[data-theme="light"] .suggestions-header {
+  color: #111 !important;
+}
+/* Force modal and overlay to white in light mode */
+body[data-theme="light"] #modalOverlay,
+body[data-theme="light"] .modal-overlay {
+  background: rgba(255,255,255,0.96) !important;
+}
+
+body[data-theme="light"] #modal,
+body[data-theme="light"] .modal {
+  background: #fff !important;
+  color: #222 !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  border: 1px solid #eee;
+}
+/* Add or update company picker style for light mode */
+.company-picker, .company-list, .company-dropdown {
+  background: #fff !important;
+  color: #222 !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+/* If a more specific selector is needed, add it here */
+/* Example: .company-picker-modal, .company-picker-dropdown, etc. */
 :root{
   --sky:#AEE7D7;            /* softer TEAL */
   --pink:#B9A2E5;           /* soft LILAC */
@@ -23,12 +57,16 @@
   --border-color: rgba(0, 0, 0, 0.15);
   --modal-bg: rgba(255, 255, 255, 0.9);
   --modal-overlay: rgba(0, 0, 0, 0.5);
-  
-  /* Predictions page variables */
-  --glass-bg: rgba(0, 0, 0, 0.05);
-  --glass-heavy: rgba(0, 0, 0, 0.08);
-  --glass-border: rgba(0, 0, 0, 0.15);
-  --time-color: #2b3142;
+  }
+
+  /* Force modal overlay and modal background to white in light mode */
+  #modalOverlay.open {
+    background: rgba(255,255,255,0.98) !important;
+  }
+#modal.show, #modal {
+  background: #fff !important;
+  color: #222 !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
 }
 
 
