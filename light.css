@@ -85,6 +85,7 @@ body{
 }
 .brand{display:flex; align-items:center; gap:10px; justify-self:center;}
 .app-title{
+
   margin:0; 
   letter-spacing:1px;
   color: #000000;
@@ -251,6 +252,7 @@ body{
 @keyframes bounce{ to{ opacity:.3; transform: translateY(-8px); } }
 
 /* Fade-in */
+
 @keyframes fadeIn { from{opacity:0; transform: translateY(2px);} to{opacity:1; transform:none;} }
 .fade{ opacity:0; animation: fadeIn .45s ease-out forwards; }
 

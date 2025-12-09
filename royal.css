@@ -234,8 +234,8 @@ body{
 
 /* TWIN* button - sky blue for royal theme */
 .star-btn { 
-  background: var(--sky) !important; 
-  color: #fff !important; 
+ color:#fff; font-weight:700;
+  background: linear-gradient(90deg, var(--sky), var(--pink));
   border: 2px solid var(--sky) !important;
   padding: 8px 16px !important;
   font-size: 13px !important;

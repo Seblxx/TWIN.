@@ -335,8 +335,8 @@
 
     /* Expanded Card Modal */
     .expanded-card {
-      background: var(--glass-heavy, rgba(255,255,255,0.12));
-      border: 1px solid var(--glass-border, rgba(255,255,255,0.3));
+      background: var(--glass-heavy, white);
+      border: 1px solid var(--glass-border, white);
       border-radius: 24px;
       padding: 32px;
       max-width: 600px;
@@ -808,7 +808,7 @@
 <body>
   <div class="shell">
     <!-- Theme toggle -->
-    <div id="themeToggle" class="theme-toggle-circle"></div>
+    <div id="themeToggle" class="theme-toggle-circle" style="display: none;"></div>
 
     <!-- Top bar -->
     <div class="predictions-topbar">
@@ -868,8 +868,8 @@
   <!-- Feedback Modal -->
   <div id="feedbackModalOverlay" class="feedback-modal-overlay">
     <div class="feedback-modal">
-      <h3 id="feedbackModalTitle">Thank You!</h3>
-      <p id="feedbackModalMessage">Your feedback helps strengthen our model.</p>
+      <h3 id="feedbackModalTitle" style="color: white;">Thank You!</h3>
+<p id="feedbackModalMessage" style="color: white;">Your feedback helps strengthen our model.</p>
       <button id="closeFeedbackModalBtn" onclick="closeFeedbackModal()">OK</button>
     </div>
   </div>
