@@ -1,15 +1,63 @@
-
+﻿
 // Stock Suggestions and Duration Presets
 let selectedStock = '';
 let selectedDuration = '';
 
-// Sparkline rendering function (stub for now)
+// Sparkline rendering function with actual chart
 function renderSparkline(ticker, container) {
-  // TODO: Implement sparkline visualization
-  // For now, just clear the container to prevent errors
-  if (container) {
-    container.innerHTML = '';
-  }
+  if (!container) return;
+  
+  // Fetch historical data and render SVG chart
+  fetch(`http://localhost:5000/history?ticker=${ticker}&days=30`)
+    .then(r => r.json())
+    .then(data => {
+      if (!data.closes || data.closes.length === 0) {
+        container.innerHTML = '<div class="muted small">No chart data available</div>';
+        return;
+      }
+      
+      const prices = data.closes;
+      const min = Math.min(...prices);
+      const max = Math.max(...prices);
+      const range = max - min || 1;
+      
+      // SVG dimensions - smaller chart
+      const width = 240;
+      const height = 60;
+      const padding = 8;
+      
+      // Create points for polyline
+      const points = prices.map((price, i) => {
+        const x = padding + (i / (prices.length - 1)) * (width - 2 * padding);
+        const y = height - padding - ((price - min) / range) * (height - 2 * padding);
+        return `${x},${y}`;
+      }).join(' ');
+      
+      // Create SVG with gradient
+      container.innerHTML = `
+        <svg width="240" height="60" viewBox="0 0 ${width} ${height}" style="display: block; margin: 8px 0; opacity: 1;">
+          <defs>
+            <linearGradient id="lineGradient-${ticker}" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color: rgba(255, 255, 255, 0.3); stop-opacity: 1" />
+              <stop offset="100%" style="stop-color: rgba(255, 255, 255, 0.8); stop-opacity: 1" />
+            </linearGradient>
+          </defs>
+          <polyline
+            points="${points}"
+            fill="none"
+            stroke="url(#lineGradient-${ticker})"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            opacity="1"
+          />
+        </svg>
+      `;
+    })
+    .catch(err => {
+      console.error('Failed to load chart:', err);
+      container.innerHTML = '';
+    });
 }
 
 function selectStock(name, ticker) {
@@ -241,14 +289,14 @@ function showLeaderboard() {
     }
 
     let html = '<div class="leaderboard-container">';
-    html += '<h3 style="margin-bottom:16px;">🏆 PREDICTIONS Leaderboard</h3>';
+    html += '<h3 style="margin-bottom:16px;">ðŸ† PREDICTIONS Leaderboard</h3>';
     html += '<p class="muted small" style="margin-bottom:16px;">Check if your predictions were accurate. Your feedback strengthens our model!</p>';
     html += '<div class="predictions-list">';
     
     predictions.reverse().forEach((pred, idx) => {
       const date = new Date(pred.timestamp);
       const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-      const arrow = pred.delta >= 0 ? '📈' : '📉';
+      const arrow = pred.delta >= 0 ? 'ðŸ“ˆ' : 'ðŸ“‰';
       const deltaClass = pred.delta >= 0 ? 'up' : 'down';
       const hasFeedback = pred.feedback !== undefined;
       const feedbackClass = pred.feedback === 'yes' ? 'feedback-yes' : pred.feedback === 'no' ? 'feedback-no' : '';
@@ -280,14 +328,14 @@ function showLeaderboard() {
           <div class="pred-feedback">
             <span class="feedback-label">Was this accurate?</span>
             <div class="feedback-buttons">
-              <button class="feedback-btn feedback-yes-btn" onclick="submitFeedback('${pred.id}', 'yes')">✓ Yes</button>
-              <button class="feedback-btn feedback-no-btn" onclick="submitFeedback('${pred.id}', 'no')">✗ No</button>
+              <button class="feedback-btn feedback-yes-btn" onclick="submitFeedback('${pred.id}', 'yes')">âœ“ Yes</button>
+              <button class="feedback-btn feedback-no-btn" onclick="submitFeedback('${pred.id}', 'no')">âœ— No</button>
             </div>
           </div>
           ` : `
           <div class="pred-feedback-complete">
             <span class="feedback-result ${pred.feedback === 'yes' ? 'feedback-yes-text' : 'feedback-no-text'}">
-              ${pred.feedback === 'yes' ? '✓ Marked accurate' : '✗ Marked inaccurate'}
+              ${pred.feedback === 'yes' ? 'âœ“ Marked accurate' : 'âœ— Marked inaccurate'}
             </span>
             ${pred.feedback === 'no' && pred.inaccuracyValue ? `
               <div class="inaccuracy-details" style="margin-top:8px;font-size:12px;opacity:0.8;">
@@ -556,7 +604,7 @@ function completeFeedbackSubmission(predId, feedback, inaccuracyData, notes) {
     // Show thank you message
     const thankYouMsg = document.createElement('div');
     thankYouMsg.className = 'feedback-thank-you';
-    thankYouMsg.innerHTML = '<p>✨ Thank you for strengthening our model! ✨</p>';
+    thankYouMsg.innerHTML = '<p>âœ¨ Thank you for strengthening our model! âœ¨</p>';
     thankYouMsg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(59,130,246,.95);color:#fff;padding:20px 40px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:10001;font-weight:700;font-size:18px;text-align:center;animation:fadeInScale .3s ease;';
     document.body.appendChild(thankYouMsg);
     
@@ -620,7 +668,22 @@ function addLoading(container){
 }
 function fade(el){ el.classList.add('fade'); return el; }
 
-// Inject minimal CSS so you don’t have to edit theme files
+// Show Coming Soon modal for TWIN*
+function showComingSoonModal() {
+  const overlay = document.getElementById('modalOverlay');
+  const modal = document.getElementById('modal');
+  const modalHead = modal.querySelector('.modal-head');
+  const modalBody = modal.querySelector('.modal-body');
+  
+  modalHead.innerHTML = '<span>TWIN*</span>';
+  modalBody.innerHTML = '<p style="font-size: 18px; text-align: center; padding: 20px 0;">The Model is Coming Soon.</p>';
+  
+  overlay.classList.add('open');
+  setTimeout(() => overlay.classList.add('fade-in'), 10);
+  setTimeout(() => modal.classList.add('show'), 10);
+}
+
+// Inject minimal CSS so you donâ€™t have to edit theme files
 (function injectExplainCSS(){
   const css = `
   .explain-actions .xlate{
@@ -1422,9 +1485,15 @@ function prettyMethodName(m){
           .replace(/ema/i,'EMA')
           .replace(/dma/i,'DMA')
           .replace(/\bma\b/i,'MA')
+          .replace(/ml/i,'ML')
+          .replace(/v1/i,'V1')
+          .replace(/v2/i,'V2')
           .replace(/Mean Reversion/i,'Mean Reversion')
           .replace(/Linear Trend/i,'Linear Trend')
           .replace(/Trend Blend/i,'Trend Blend')
+          .replace(/Ridge ML V2/i,'Light ML')
+          .replace(/Light ML V1/i,'Light ML V1')
+          .replace(/\bGbm\b/i,'GBM')
           .replace(/drift/i,'Drift');
 }
 
@@ -1459,11 +1528,8 @@ async function updateExistingForecast(bot, newMethod, query) {
     const delta = data.result - data.lastClose;
     const pct   = (delta / data.lastClose) * 100;
     const sign  = delta >= 0 ? '+' : '';
-    const methods = ['ema_drift','linear_trend','mean_reversion','trend_blend'];
-    const methodButtons = methods.map(m => `
-      <button class="method-btn ${m === data.method ? 'active' : ''}" data-method="${m}" title="Switch to ${prettyMethodName(m)}">${prettyMethodName(m)}</button>
-    `).join('');
-    const methodToggle = `<span class="method-toggle" role="button" aria-expanded="false" title="Change equation">Method: ${prettyMethodName(data.method)} · drift/day: ${Number(data.drift_per_day).toFixed(4)} ▾</span>`;
+    // TWIN- now shows method as static text (no toggle)
+    const methodInfo = `<div class="muted small" style="margin: 8px 0;">Method: ${prettyMethodName(data.method)} · drift/day: ${Number(data.drift_per_day).toFixed(4)}</div>`;
     const backtestRow = data.backtest ? `
       <div class="backtest-row muted">Backtest: MAE ≈ <strong>$${data.backtest.mae.toFixed(2)}</strong> (120 days, ${data.duration} horizon)</div>
     ` : '';
@@ -1491,10 +1557,7 @@ async function updateExistingForecast(bot, newMethod, query) {
       <div>Forecasted price: <strong>$${data.result.toFixed(2)}</strong>
         <span class="${delta>=0 ? 'up' : 'down'}">(${sign}${delta.toFixed(2)} | ${sign}${pct.toFixed(2)}%)</span>
       </div>
-        <div class="method-row">
-          ${methodToggle}
-          <div class="method-menu hidden">${methodButtons}</div>
-        </div>
+      ${methodInfo}
       <div class="sparkline"></div>
       <div class="btnrow">
         <button class="action-btn explain-btn" type="button">Explain</button>
@@ -1513,43 +1576,7 @@ async function updateExistingForecast(bot, newMethod, query) {
       backtest:data.backtest || null
     });
     
-  bot.querySelector('.plus-btn').addEventListener('click', () => sendPlus(query));
-    
-    // Re-wire method toggle and buttons
-    const toggleEl = bot.querySelector('.method-toggle');
-    const menuEl = bot.querySelector('.method-menu');
-    toggleEl.addEventListener('click', () => {
-      // Subtle, smooth tap animation (no spin)
-      toggleEl.classList.remove('tap'); // reset if still present
-      void toggleEl.offsetWidth; // reflow to allow retrigger
-      toggleEl.classList.add('tap');
-
-      const hidden = menuEl.classList.contains('hidden');
-      if (hidden){
-        menuEl.classList.remove('hidden');
-        toggleEl.setAttribute('aria-expanded','true');
-        toggleEl.textContent = `Method: ${prettyMethodName(data.method)} · drift/day: ${Number(data.drift_per_day).toFixed(4)} ▴`;
-      } else {
-        menuEl.classList.add('hidden');
-        toggleEl.setAttribute('aria-expanded','false');
-        toggleEl.textContent = `Method: ${prettyMethodName(data.method)} · drift/day: ${Number(data.drift_per_day).toFixed(4)} ▾`;
-      }
-      scrollDown(pane,true);
-    });
-    // Clean up class after animation ends
-    toggleEl.addEventListener('animationend', (e) => {
-      if (e.animationName === 'method-tap') {
-        toggleEl.classList.remove('tap');
-      }
-    });
-    
-    menuEl.querySelectorAll('.method-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const selectedMethod = btn.getAttribute('data-method');
-        if (!selectedMethod || selectedMethod === data.method) return;
-        updateExistingForecast(bot, selectedMethod, query);
-      });
-    });
+    bot.querySelector('.plus-btn').addEventListener('click', () => sendPlus(query));
     
     renderSparkline(data.stock, bot.querySelector('.sparkline'));
     
@@ -1693,12 +1720,8 @@ async function sendBasic(methodOverride = null, reusedQuery = null) {
     const delta = data.result - data.lastClose;
     const pct   = (delta / data.lastClose) * 100;
     const sign  = delta >= 0 ? '+' : '';
-      const methods = ['ema_drift','linear_trend','mean_reversion','trend_blend']; // include trend_blend placeholder
-      const methodButtons = methods.map(m => `
-        <button class="method-btn ${m === data.method ? 'active' : ''}" data-method="${m}" title="Switch to ${prettyMethodName(m)}">${prettyMethodName(m)}</button>
-      `).join('');
-      // Collapsible method menu per spec with drift/day inline
-      const methodToggle = `<span class="method-toggle" role="button" aria-expanded="false" title="Change equation">Method: ${prettyMethodName(data.method)} · drift/day: ${Number(data.drift_per_day).toFixed(4)} ▾</span>`;
+    // TWIN- now shows method as static text (no toggle)
+    const methodInfo = `<div class="muted small" style="margin: 8px 0;">Method: ${prettyMethodName(data.method)} · drift/day: ${Number(data.drift_per_day).toFixed(4)}</div>`;
     const backtestRow = data.backtest ? `
       <div class="backtest-row muted">Backtest: MAE ≈ <strong>$${data.backtest.mae.toFixed(2)}</strong> (120 days, ${data.duration} horizon)</div>
     ` : '';
@@ -1716,10 +1739,7 @@ async function sendBasic(methodOverride = null, reusedQuery = null) {
       <div>Forecasted price: <strong>$${data.result.toFixed(2)}</strong>
         <span class="${delta>=0 ? 'up' : 'down'}">(${sign}${delta.toFixed(2)} | ${sign}${pct.toFixed(2)}%)</span>
       </div>
-        <div class="method-row">
-          ${methodToggle}
-          <div class="method-menu hidden">${methodButtons}</div>
-        </div>
+      ${methodInfo}
       <div class="sparkline"></div>
       <div class="btnrow">
         <button class="action-btn explain-btn" type="button">Explain</button>
@@ -1820,49 +1840,7 @@ async function sendBasic(methodOverride = null, reusedQuery = null) {
         }
       });
     }
-    // Wire method buttons for re-forecasting without duplicating user text entry
-    // Toggle open/close of method menu
-    const toggleEl = bot.querySelector('.method-toggle');
-    const menuEl = bot.querySelector('.method-menu');
-    toggleEl.addEventListener('click', () => {
-      // Subtle, smooth tap animation (no spin)
-      toggleEl.classList.remove('tap'); // reset if still present
-      void toggleEl.offsetWidth; // reflow to allow retrigger
-      toggleEl.classList.add('tap');
-      
-      const hidden = menuEl.classList.contains('hidden');
-      if (hidden){
-        menuEl.classList.remove('hidden');
-        toggleEl.setAttribute('aria-expanded','true');
-        toggleEl.textContent = `Method: ${prettyMethodName(data.method)} · drift/day: ${Number(data.drift_per_day).toFixed(4)} ▴`;
-      } else {
-        menuEl.classList.add('hidden');
-        toggleEl.setAttribute('aria-expanded','false');
-        toggleEl.textContent = `Method: ${prettyMethodName(data.method)} · drift/day: ${Number(data.drift_per_day).toFixed(4)} ▾`;
-      }
-      scrollDown(pane,true);
-    });
-    // Clean up class after animation ends
-    toggleEl.addEventListener('animationend', (e) => {
-      if (e.animationName === 'method-tap') {
-        toggleEl.classList.remove('tap');
-      }
-    });
-    // Wire method buttons for re-forecasting without duplicating user text entry
-    menuEl.querySelectorAll('.method-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const newMethod = btn.getAttribute('data-method');
-        if (!newMethod || newMethod === data.method) return;
-        
-        // Remove the current bot message to replace it with loading
-        if (bot && bot.parentNode) {
-          bot.parentNode.removeChild(bot);
-        }
-        
-        // Make fresh API call with the new method
-        sendBasic(newMethod, q);
-      });
-    });
+    
     renderSparkline(data.stock, bot.querySelector('.sparkline'));
 
   } catch (e) {
@@ -1879,8 +1857,8 @@ async function sendBasic(methodOverride = null, reusedQuery = null) {
 }
 
 
-async function sendPlus(queryFromTwin = null) {
-  console.log('sendPlus() called with:', queryFromTwin);
+async function sendPlus(queryFromTwin = null, methodOverride = null) {
+  console.log('sendPlus() called with:', queryFromTwin, 'method:', methodOverride);
   const inputEl = document.getElementById('userInput');
   const raw = (queryFromTwin ?? inputEl.value);
   const q = (raw || '').trim();
@@ -1897,7 +1875,7 @@ async function sendPlus(queryFromTwin = null) {
     warn.className = 'bot';
     warn.innerHTML = `
       <div class="title">Need a timeframe</div>
-      <div class="muted">TWIN+ needs a horizon. Try: “${q} in 3 days” or “${q} next week”.</div>
+      <div class="muted">TWIN+ needs a horizon. Try: â€œ${q} in 3 daysâ€ or â€œ${q} next weekâ€.</div>
     `;
     fade(warn); pane.appendChild(warn); scrollDown(pane, true); return;
   }
@@ -1911,11 +1889,15 @@ async function sendPlus(queryFromTwin = null) {
 
   try {
     console.log('Fetching TWIN+ from:', 'http://localhost:5000/predict_plus');
-    // FETCH UNCHANGED
+    const payload = { input: q };
+    if (methodOverride) {
+      payload.method = methodOverride;
+      console.log('Including method in payload:', methodOverride);
+    }
     const r = await fetch('http://localhost:5000/predict_plus', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ input: q })
+      body: JSON.stringify(payload)
     });
     console.log('TWIN+ response status:', r.status);
     const data = await r.json();
@@ -1978,22 +1960,29 @@ async function sendPlus(queryFromTwin = null) {
       const delta = data.result - data.lastClose;
       const pct = (delta / data.lastClose) * 100;
       const sign = delta >= 0 ? '+' : '';
+      // TWIN+ now has method toggle with ML model options
+      const mlMethods = ['ridge_ml_v2', 'linear_trend', 'mean_reversion', 'gbm'];
+      const methodButtons = mlMethods.map(m => `
+        <button class="method-btn ${m === (data.method || 'ridge_ml_v2') ? 'active' : ''}" data-method="${m}" title="Switch to ${prettyMethodName(m)}">${prettyMethodName(m)}</button>
+      `).join('');
+      const methodToggle = `<span class="method-toggle" role="button" aria-expanded="false" title="Change model">Method: ${prettyMethodName(data.method || 'ridge_ml_v2')} · drift/day: ${Number(data.drift_per_day).toFixed(4)} ▾</span>`;
       forecastBlock = `
         <div>Forecasted price: <strong>$${data.result.toFixed(2)}</strong>
           <span class="${delta>=0 ? 'up':'down'}">(${sign}${delta.toFixed(2)} | ${sign}${pct.toFixed(2)}%)</span>
         </div>
         <div class="method-row">
-          <span class="muted">Method: ${prettyMethodName(data.method || 'light_ml_v1')} · drift/day: ${Number(data.drift_per_day).toFixed(4)}</span>
+          ${methodToggle}
+          <div class="method-menu hidden">${methodButtons}</div>
         </div>
       `;
     }
     const voltxt  = d.ann_vol_forecast != null ? `${(d.ann_vol_forecast*100).toFixed(1)}%` : 'n/a';
     const sizetxt = d.position_size != null ? `${(d.position_size*100).toFixed(0)}%` : 'n/a';
     const rangeTxt = (d.donchian50_lo != null && d.donchian50_hi != null)
-      ? ` (range ${d.donchian50_lo?.toFixed(2)}–${d.donchian50_hi?.toFixed(2)})`
+      ? ` (range ${d.donchian50_lo?.toFixed(2)}â€“${d.donchian50_hi?.toFixed(2)})`
       : '';
 
-    const summaryLine = `<div class="plus-summary muted"><strong>${data.method.replace('_',' ')}</strong> | Momentum ${(d.momentum_12m*100).toFixed(1)}% | Vol ${voltxt} | Size ${sizetxt}</div>`;
+    const summaryLine = `<div class="plus-summary muted"><strong>${prettyMethodName(data.method)}</strong> | Momentum ${(d.momentum_12m*100).toFixed(1)}% | Vol ${voltxt} | Size ${sizetxt}</div>`;
 
     bot.innerHTML = `
       <div class="flip-card">
@@ -2003,12 +1992,11 @@ async function sendPlus(queryFromTwin = null) {
             <div>Last close: <strong>$${data.lastClose ? data.lastClose.toFixed(2) : 'N/A'}</strong></div>
             ${forecastBlock}
             ${summaryLine}
-            <div class="sparkline"></div>
             <div class="btnrow">
               <button class="action-btn explain-btn" type="button">Explain</button>
               <button class="action-btn star-btn" type="button" title="Switch to TWIN* (heavy ML)" aria-label="Switch to TWIN* model">TWIN*</button>
             </div>
-            <div class="explain hidden"></div>
+            <div class="technical-details hidden"></div>
           </div>
           <div class="face back">
             <div class="flip-badge">TWIN*</div>
@@ -2026,12 +2014,6 @@ async function sendPlus(queryFromTwin = null) {
     `;
     fade(bot); pane.appendChild(bot); scrollDown(pane, true);
 
-    // Render sparkline for TWIN+ front face
-    const sparklineContainer = bot.querySelector('.front .sparkline');
-    if (sparklineContainer) {
-      renderSparkline(data.stock, sparklineContainer);
-    }
-
     // Flip handling with TWIN* API call
   const flipCard = bot.querySelector('.flip-card');
   const flipBtnFront = bot.querySelector('.star-btn');
@@ -2039,7 +2021,10 @@ async function sendPlus(queryFromTwin = null) {
   const cardContainer = pane.closest('.card');
     if (flipBtnFront) {
       flipBtnFront.addEventListener('click', async () => {
-        flipCard.classList.add('flipped');
+        // Show coming soon modal
+        showComingSoonModal();
+        return;
+        // flipCard.classList.add('flipped');
         // Don't tint inner content, only the outer card
         if (cardContainer) {
           cardContainer.classList.add('twin-star-active');
@@ -2072,7 +2057,7 @@ async function sendPlus(queryFromTwin = null) {
                 <div>Forecasted price: <strong>$${starData.result.toFixed(2)}</strong>
                   <span class="${delta>=0 ? 'up':'down'}">(${sign}${delta.toFixed(2)} | ${sign}${pct.toFixed(2)}%)</span>
                 </div>
-                <div class="muted small" style="margin-top:8px">Method: ${starData.method || 'ensemble'} · drift/day: ${starData.drift_per_day.toFixed(4)}</div>
+                <div class="muted small" style="margin-top:8px">Method: ${starData.method || 'ensemble'} Â· drift/day: ${starData.drift_per_day.toFixed(4)}</div>
               `;
             } else {
               starForecastDiv.textContent = starData.error || 'TWIN* model not available yet';
@@ -2100,15 +2085,84 @@ async function sendPlus(queryFromTwin = null) {
       });
     }
 
-    // Explain panel wiring
-    // Explain for front face
-    const explainPanelFront = bot.querySelector('.front .explain');
-    const explainBtnFront = bot.querySelector('.front .explain-btn');
-    if (explainPanelFront && explainBtnFront){
-      attachExplain(explainBtnFront, explainPanelFront, {
-        mode: 'plus',
-        decision: data.decision,
-        diagnostics: d
+    // Wire method toggle for TWIN+
+    const toggleEl = bot.querySelector('.method-toggle');
+    const menuEl = bot.querySelector('.method-menu');
+    if (toggleEl && menuEl) {
+      toggleEl.addEventListener('click', () => {
+        toggleEl.classList.remove('tap');
+        void toggleEl.offsetWidth;
+        toggleEl.classList.add('tap');
+
+        const hidden = menuEl.classList.contains('hidden');
+        if (hidden){
+          menuEl.classList.remove('hidden');
+          toggleEl.setAttribute('aria-expanded','true');
+          toggleEl.textContent = `Method: ${prettyMethodName(data.method || 'ridge_ml_v2')} · drift/day: ${Number(data.drift_per_day).toFixed(4)} ▴`;
+        } else {
+          menuEl.classList.add('hidden');
+          toggleEl.setAttribute('aria-expanded','false');
+          toggleEl.textContent = `Method: ${prettyMethodName(data.method || 'ridge_ml_v2')} · drift/day: ${Number(data.drift_per_day).toFixed(4)} ▾`;
+        }
+        scrollDown(pane,true);
+      });
+      
+      toggleEl.addEventListener('animationend', (e) => {
+        if (e.animationName === 'method-tap') {
+          toggleEl.classList.remove('tap');
+        }
+      });
+
+      // Wire method buttons for TWIN+ to call different ML models
+      menuEl.querySelectorAll('.method-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const selectedMethod = btn.getAttribute('data-method');
+          if (!selectedMethod || selectedMethod === (data.method || 'ridge_ml_v2')) return;
+          
+          console.log('Method button clicked:', selectedMethod, 'Original query:', q);
+          
+          // Remove only this bot message to refresh just this query
+          bot.remove();
+          // Also remove the user message that came right before it
+          const userMessages = pane.querySelectorAll('.user');
+          if (userMessages.length > 0) {
+            const lastUserMsg = userMessages[userMessages.length - 1];
+            if (lastUserMsg && lastUserMsg.textContent.includes(q.split(' ').slice(0, 2).join(' '))) {
+              lastUserMsg.remove();
+            }
+          }
+          
+          // Re-call sendPlus with the selected method, using captured q from closure
+          sendPlus(q, selectedMethod);
+        });
+      });
+    }
+
+    // Details button wiring for TWIN+ front face
+    const detailsPanelFront = bot.querySelector('.front .technical-details');
+    const detailsBtnFront = bot.querySelector('.front .explain-btn');
+    if (detailsPanelFront && detailsBtnFront){
+      detailsBtnFront.addEventListener('click', () => {
+        const isHidden = detailsPanelFront.classList.contains('hidden');
+        if (isHidden) {
+          detailsPanelFront.innerHTML = `
+            <h4 class="explain-title">Technical Details</h4>
+            <ul class="metrics-list">
+              <li><strong>12m momentum:</strong> ${(d.momentum_12m*100)?.toFixed(2) || 'n/a'}%</li>
+              <li><strong>50/200 DMA slope:</strong> ${d.dma50_slope?.toFixed(4) || 'n/a'} / ${d.dma200_slope?.toFixed(4) || 'n/a'}</li>
+              <li><strong>Donchian 50:</strong> ${d.donchian50_breakout ? 'BREAKOUT' : 'range'}${(d.donchian50_lo && d.donchian50_hi) ? ` (range ${d.donchian50_lo?.toFixed(2)}–${d.donchian50_hi?.toFixed(2)})` : ''}</li>
+              <li><strong>Annualized vol (HAR-RV):</strong> ${d.ann_vol_forecast ? `${(d.ann_vol_forecast*100).toFixed(1)}%` : 'n/a'}</li>
+              <li><strong>Position size @ ${d.target_vol ? (d.target_vol*100).toFixed(0) : '20'}% target vol:</strong> ${d.position_size ? `${(d.position_size*100).toFixed(0)}%` : 'n/a'}</li>
+            </ul>
+            <div class="explain-decision small muted" style="margin-top: 8px;">${data.decision ? 'Summary: ' + data.decision : ''}</div>
+          `;
+          detailsPanelFront.classList.remove('hidden');
+          detailsPanelFront.classList.add('fade');
+          detailsBtnFront.textContent = 'Hide';
+        } else {
+          detailsPanelFront.classList.add('hidden');
+          detailsBtnFront.textContent = 'Explain';
+        }
       });
     }
     // Explain for back face (reuse diagnostics)
@@ -2174,84 +2228,79 @@ function attachExplain(btn, panel, data) {
     if (data.mode === 'price_only') {
       return `
         <div class="explain-body">
-          <p><strong>What you’re seeing:</strong> Latest closing price for <strong>${data.stock}</strong>.</p>
-          <p><strong>Why no forecast?</strong> No timeframe provided. Try “${data.stock} in 3 days”.</p>
+          <p><strong>What youâ€™re seeing:</strong> Latest closing price for <strong>${data.stock}</strong>.</p>
+          <p><strong>Why no forecast?</strong> No timeframe provided. Try â€œ${data.stock} in 3 daysâ€.</p>
         </div>
       `;
     }
 
 
     if (data.mode === 'plus') {
+      // Dynamic explanation based on method
+      const method = data.method || 'ridge_ml_v2';
+      let methodExplanation = '';
+      
+      if (method === 'ridge_ml_v2') {
+        methodExplanation = `<p><strong>Light ML</strong> uses machine learning with Ridge Regression to analyze multiple momentum indicators across different time periods (1-month, 3-month, 6-month, and 12-month). It identifies patterns in historical price movements and predicts future direction based on these learned relationships.</p>`;
+      } else if (method === 'linear_trend') {
+        methodExplanation = `<p><strong>Linear Trend</strong> fits a straight line through the last 60 days of price data using polynomial regression. It then extends this trend line forward to predict where the price will be at your target date, assuming the current trend continues.</p>`;
+      } else if (method === 'mean_reversion') {
+        methodExplanation = `<p><strong>Mean Reversion</strong> assumes prices tend to return to their average. It calculates how far the current price is from its moving average and predicts a gradual movement back toward that average level over time.</p>`;
+      } else if (method === 'gbm') {
+        methodExplanation = `<p><strong>GBM</strong> (Geometric Brownian Motion) is a statistical model commonly used in finance. It estimates the stock's drift (average growth rate) and volatility from historical data, then projects the price forward using exponential growth with randomness.</p>`;
+      }
+      
       const proHTML = `
        <div class="explain-pro">
-    <h4 class="explain-title">What does TWIN+ checks?</h4>
-    <ol class="steps">
+    <h4 class="explain-title">How ${prettyMethodName(method)} works:</h4>
+    ${methodExplanation}
+    
+    <h4 class="explain-title" style="margin-top:16px;">What does TWIN+ check?</h4>
+    <ul class="bullets" style="font-size: 14px;">
       <li><strong>Overall direction:</strong> Up or down vs. last year?</li>
       <li><strong>Trend lines:</strong> Are the 50-day and 200-day lines pointing up?</li>
       <li><strong>New high test:</strong> Is today above the past 50-day high (strong) or still inside that range (undecided)?</li>
-      <li><strong>Choppiness:</strong> How “jumpy” the stock could be.</li>
+      <li><strong>Choppiness:</strong> How "jumpy" the stock could be.</li>
       <li><strong>Right-sizing:</strong> A suggested position size so risk stays steady.</li>
-    </ol>
-    
-    <h4 class="explain-title" style="margin-top:16px;">Technical Details</h4>
-    <ul class="metrics-list">
-      <li><strong>12m momentum:</strong> ${(data.diagnostics?.momentum_12m*100)?.toFixed(2) || 'n/a'}%</li>
-      <li><strong>50/200 DMA slope:</strong> ${data.diagnostics?.dma50_slope?.toFixed(4) || 'n/a'} / ${data.diagnostics?.dma200_slope?.toFixed(4) || 'n/a'}</li>
-      <li><strong>Donchian 50:</strong> ${data.diagnostics?.donchian50_breakout ? 'BREAKOUT' : 'range'}${(data.diagnostics?.donchian50_lo && data.diagnostics?.donchian50_hi) ? ` (range ${data.diagnostics.donchian50_lo?.toFixed(2)}–${data.diagnostics.donchian50_hi?.toFixed(2)})` : ''}</li>
-      <li><strong>Annualized vol (HAR-RV):</strong> ${data.diagnostics?.ann_vol_forecast ? `${(data.diagnostics.ann_vol_forecast*100).toFixed(1)}%` : 'n/a'}</li>
-      <li><strong>Position size @ ${data.diagnostics?.target_vol ? (data.diagnostics.target_vol*100).toFixed(0) : '20'}% target vol:</strong> ${data.diagnostics?.position_size ? `${(data.diagnostics.position_size*100).toFixed(0)}%` : 'n/a'}</li>
     </ul>
+    
     <div class="explain-actions">
-      <button class="xlate" type="button" aria-expanded="false" style="color: inherit">Translate</button>
+      <button class="details-toggle" type="button" aria-expanded="false" style="color: inherit">Details</button>
       <button class="copy-btn" type="button" title="Copy explanation to clipboard">
         <i class="fas fa-copy"></i> Copy
       </button>
     </div>
-    <div class="explain-decision small muted">${data.decision ? 'Summary: ' + data.decision : ''}</div>
+    
+    <div class="technical-details hidden" style="margin-top: 16px;">
+      <h4 class="explain-title">Technical Details</h4>
+      <ul class="metrics-list">
+        <li><strong>12m momentum:</strong> ${(data.diagnostics?.momentum_12m*100)?.toFixed(2) || 'n/a'}%</li>
+        <li><strong>50/200 DMA slope:</strong> ${data.diagnostics?.dma50_slope?.toFixed(4) || 'n/a'} / ${data.diagnostics?.dma200_slope?.toFixed(4) || 'n/a'}</li>
+        <li><strong>Donchian 50:</strong> ${data.diagnostics?.donchian50_breakout ? 'BREAKOUT' : 'range'}${(data.diagnostics?.donchian50_lo && data.diagnostics?.donchian50_hi) ? ` (range ${data.diagnostics.donchian50_lo?.toFixed(2)}â€“${data.diagnostics.donchian50_hi?.toFixed(2)})` : ''}</li>
+        <li><strong>Annualized vol (HAR-RV):</strong> ${data.diagnostics?.ann_vol_forecast ? `${(data.diagnostics.ann_vol_forecast*100).toFixed(1)}%` : 'n/a'}</li>
+        <li><strong>Position size @ ${data.diagnostics?.target_vol ? (data.diagnostics.target_vol*100).toFixed(0) : '20'}% target vol:</strong> ${data.diagnostics?.position_size ? `${(data.diagnostics.position_size*100).toFixed(0)}%` : 'n/a'}</li>
+      </ul>
+    </div>
+    
+    <div class="explain-decision small muted" style="margin-top: 8px;">${data.decision ? 'Summary: ' + data.decision : ''}</div>
   </div>
       `;
-      const friendlyHTML = `
-        <div class="explain-friendly hidden" aria-hidden="true">
-          <h4 class="explain-title">TWIN+ (Simplified)</h4>
-          <ul class="bullets">
-           <li><strong>Direction:</strong> Are we higher or lower than roughly a year ago?</li>
-      <li><strong>Trend:</strong> Are the 50-day and 200-day averages pointing up or down?</li>
-      <li><strong>New highs check (50-day):</strong> Is today above the recent 50-day high (strong), in the range (undecided), or near the low (weak)?</li>
-      <li><strong>Volatility:</strong> How much the price tends to swing.</li>
-      <li><strong>Position size:</strong> A suggested size to keep risk around a steady level.</li>
-          </ul>
-          <div class="explain-actions">
-            <button class="xlate" type="button" aria-expanded="true" style="color: inherit">Back to metrics</button>
-            <button class="copy-btn" type="button" title="Copy explanation to clipboard">
-              <i class="fas fa-copy"></i> Copy
-            </button>
-          </div>
-          <div class="explain-tiny muted">${data.decision ? 'What this means: ' + data.decision : ''}</div>
-        </div>
-      `;
-      return `<div class="explain-body">${proHTML}${friendlyHTML}</div>`;
+      return `<div class="explain-body">${proHTML}</div>`;
     }
 
     
     const dir = (data.delta || 0) >= 0 ? 'up' : 'down';
     const mname = (data.method || '').replace('_',' ');
-    const back = data.backtest ? `<li>Recent average error ≈ <strong>$${fmt2(data.backtest.mae)}</strong>.</li>` : '';
+    const backtest = data.backtest ? `<p style="font-size: 12px; margin-top: 8px; color: #888;">Recent backtest: average error â‰ˆ $${fmt2(data.backtest.mae)}</p>` : '';
     return `
   <div class="explain-body">
-        <h4 class="explain-title">What is TWIN- doing?</h4>
-        <p><strong>Your request:</strong> “${data.stock}${data.duration ? ' in ' + data.duration : ''}”.</p>
-        <p><strong>Result:</strong> We project <strong>$${fmt2(data.result)}</strong> ${dir} from last close by <strong>$${fmt2(data.delta)}</strong> (${fmt2(data.pct || (data.delta/data.lastClose)*100)}%).</p>
-        <h4 class="explain-title">How?</h4>
-        <ul class="bullets">
-          <li><strong>Operation:</strong> Our formula uses an Exponential Moving Average.</li>
-          <li><strong>Measure drift:</strong> It then estimates the average daily move from recent market data.</li>
-          <li><strong>Projection:</strong> It extends that drift across your chosen period and returns a prediction.</li>
-        </ol>
-        <ul class="bullets">
-          <li><em>Estimated Price Change / Day:</em> ${fmt2(data.driftPerDay)}</li>
-          ${back}
-        </ul>
-        <div class="explain-tiny muted">Quick directional hint | not a guarantee.</div>
+        <p style="font-size: 13px; margin-bottom: 8px;">TWIN- forecasts <strong>$${fmt2(data.result)}</strong> for ${data.stock}${data.duration ? ' in ' + data.duration : ''}, ${dir} by <strong>$${fmt2(data.delta)}</strong> (${fmt2(data.pct || (data.delta/data.lastClose)*100)}%).</p>
+        
+        <p style="font-size: 13px; margin-bottom: 8px;">The model uses an Exponential Moving Average to estimate drift, then projects that trend forward. Estimated daily drift: ${fmt2(data.driftPerDay)}.</p>
+        
+        ${backtest}
+        
+        <div class="explain-tiny muted" style="margin-top: 12px;">Quick directional hint | not a guarantee.</div>
       </div>
     `;
   };
@@ -2271,6 +2320,24 @@ function attachExplain(btn, panel, data) {
       btn.textContent = 'Hide';
 
       
+      // Add Details toggle handler for TWIN+
+      panel.querySelectorAll('.details-toggle').forEach(el => {
+        el.addEventListener('click', () => {
+          const details = panel.querySelector('.technical-details');
+          const isHidden = details.classList.contains('hidden');
+          
+          if (isHidden) {
+            details.classList.remove('hidden');
+            el.textContent = 'Hide Details';
+            el.setAttribute('aria-expanded', 'true');
+          } else {
+            details.classList.add('hidden');
+            el.textContent = 'Details';
+            el.setAttribute('aria-expanded', 'false');
+          }
+        });
+      });
+
       panel.querySelectorAll('.xlate').forEach(el => {
         el.addEventListener('click', () => {
           const pro = panel.querySelector('.explain-pro');

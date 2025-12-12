@@ -30,6 +30,26 @@
     min-height: 100vh;
   }
   
+  /* Hide scrollbar in TWIN- */
+  #messages-basic {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  #messages-basic::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
+  /* Hide scrollbar in TWIN+ */
+  #messages-plus {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  #messages-plus::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
   /* Notification Modal */
   .notification-overlay {
     display: none;
@@ -462,6 +482,15 @@
     backdrop-filter: blur(30px);
     border-color: rgba(255, 255, 255, 0.2);
   }
+  
+  /* Prevent button growth when duration picker appears */
+  .btn-both-inside,
+  .btn-plus {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    min-width: fit-content !important;
+    max-width: fit-content !important;
+  }
 
   /* Menu overlay - behind the menu options */
   .menu-overlay {
@@ -581,7 +610,7 @@
         <button class="btn btn-plus" onclick="sendBasic()">Analyze with TWIN-</button>
       </div>
       <div class="brand" style="display: flex; align-items: center; gap: 10px;">
-        <h1 class="app-title">TWIN.</h1>
+        <h1 class="app-title" onclick="clearChat()" style="cursor: pointer;">TWIN.</h1>
         <i class="fas fa-chart-line"></i>
       </div>
     </div>

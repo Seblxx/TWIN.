@@ -222,18 +222,19 @@ body{
 
 
 .chatbox.big{ height:500px; overflow:auto; padding:14px 16px; }
-.chatbox.big::-webkit-scrollbar{ width:8px; }
+.chatbox.big::-webkit-scrollbar{ width:0; display: none; }
 .chatbox.big::-webkit-scrollbar-track{ background: transparent; }
 .chatbox.big::-webkit-scrollbar-thumb{
-  background: rgba(255,255,255,.2);
+  background: transparent;
   backdrop-filter: blur(4px);
   border-radius:10px;
   transition: background .2s ease;
 }
 .chatbox.big::-webkit-scrollbar-thumb:hover{
-  background: rgba(255,255,255,.35);
+  background: transparent;
 }
-.messages{ scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.2) transparent; }
+.messages{ scrollbar-width: none; }
+.messages::-webkit-scrollbar{ width:0; display: none; }
 
 
 .messages .user{ margin:6px 0; font-weight:700; text-align:right; color:#fcfcfc; }

@@ -164,13 +164,14 @@ body{
 
 /* Chat (transparent scrollbar) */
 .chatbox.big{ height:500px; overflow:auto; padding:14px 16px; }
-.chatbox.big::-webkit-scrollbar{ width:10px; }
+.chatbox.big::-webkit-scrollbar{ width:0; display: none; }
 .chatbox.big::-webkit-scrollbar-track{ background: transparent; }
 .chatbox.big::-webkit-scrollbar-thumb{
-  background: rgba(12,26,46,.16);                /* solid thumb */
+  background: transparent;
   border-radius:10px;
 }
-.messages{ scrollbar-width: thin; scrollbar-color: rgba(12,26,46,.2) transparent; }
+.messages{ scrollbar-width: none; }
+.messages::-webkit-scrollbar{ width:0; display: none; }
 
 
 .messages .user{ margin:6px 0; font-weight:600; text-align:right; }

@@ -121,13 +121,14 @@ body{
 
 
 .chatbox.big{ height:500px; overflow:auto; padding:14px 16px; } /* was 560 */
-.chatbox.big::-webkit-scrollbar{ width:10px; }
+.chatbox.big::-webkit-scrollbar{ width:0; display: none; }
 .chatbox.big::-webkit-scrollbar-track{ background: transparent; }
 .chatbox.big::-webkit-scrollbar-thumb{
-  background: linear-gradient(to bottom, rgba(255,255,255,.25), rgba(255,255,255,.15));
+  background: transparent;
   border-radius:10px;
 }
-.messages{ scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.25) transparent; }
+.messages{ scrollbar-width: none; }
+.messages::-webkit-scrollbar{ width:0; display: none; }
 
 
 .messages .user{ margin:6px 0; font-weight:600; text-align:right; }
@@ -232,11 +233,11 @@ body{
 .controls .btn-plus { background: var(--pink) !important; color: #ffffff !important; }
 .messages .plus-btn { background: var(--pink) !important; border-color: transparent !important; color:#ffffff !important; }
 
-/* TWIN* button - sky blue for royal theme */
+/* TWIN* button - blue to match TWIN- panel */
 .star-btn { 
  color:#fff; font-weight:700;
-  background: linear-gradient(90deg, var(--sky), var(--pink));
-  border: 2px solid var(--sky) !important;
+  background: #1a4fa8 !important;
+  border: none !important;
   padding: 8px 16px !important;
   font-size: 13px !important;
   border-radius: 10px !important;

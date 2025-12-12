@@ -121,7 +121,7 @@
     const html = `
       <p style="margin-bottom:24px;font-size:15px;line-height:1.6;color:var(--text-color,#fff);">${message}</p>
       <div style="display:flex;gap:12px;">
-        <button id="confirmYes" style="flex:1;padding:16px;border-radius:12px;border:none;background:var(--primary-gradient,linear-gradient(90deg,#48b6ff,#ff5ea8));color:#fff;font-weight:700;cursor:pointer;font-size:16px;transition:all 0.3s ease;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+        <button id="confirmYes" style="flex:1;padding:16px;border-radius:12px;border:none;background:var(--primary-gradient,linear-gradient(90deg,#48b6ff,#ff5ea8));color:#000;font-weight:700;cursor:pointer;font-size:16px;transition:all 0.3s ease;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
           Yes
         </button>
         <button id="confirmNo" style="flex:1;padding:16px;border-radius:12px;border:1px solid var(--border-color,rgba(255,255,255,0.3));background:rgba(0,0,0,0.3);color:#fff;font-weight:600;cursor:pointer;font-size:16px;transition:all 0.3s ease;">
@@ -345,9 +345,10 @@
     if (whatBtn) {
       whatBtn.addEventListener('click', () => {
         const html = `
-          <p><strong>TWIN</strong> is a simple stock forecasting assistant for beginners.</p>
-          <p><strong>TWIN-</strong> shows quick price predictions.</p>
-          <p><strong>TWIN+</strong> adds deeper analysis: momentum, trends, volatility, and position sizing.</p>
+          <p><strong>TWIN</strong> is a stock forecasting tool that provides quick predictions and detailed analysis.</p>
+          <p><strong>TWIN-</strong> delivers fast price predictions using exponential moving averages and drift analysis.</p>
+          <p><strong>TWIN+</strong> provides advanced ML-based forecasts with multiple methods (Light ML, Linear Trend, Mean Reversion, GBM) plus diagnostics including momentum, volatility, and position sizing.</p>
+          <p><strong>TWIN*</strong> offers heavy ML ensemble models (coming soon).</p>
           <p style="margin-top:16px; font-size:0.9em; opacity:0.7;"><em>Not financial advice. For educational purposes only.</em></p>
         `;
         openModal('What is TWIN?', html);
@@ -361,11 +362,14 @@
       howBtn.addEventListener('click', () => {
         const html = `
           <p><strong>1.</strong> Type a stock and timeframe: <em>"Apple in 5 days"</em></p>
-          <p><strong>2.</strong> Press <strong>ENTER</strong> for quick forecast (TWIN-)</p>
-          <p><strong>3.</strong> Press <strong>BACKSLASH (\\)</strong> for detailed analysis (TWIN+ & TWIN-)</p>
-          <p><strong>4.</strong> Press <strong>TAB</strong> to clear the chat</p>
-          <p><strong>5.</strong> Click ⭐ to save predictions</p>
-          <p style="margin-top:12px; font-size:0.9em;"><em>Theme: Click bottom-left circle</em></p>
+          <p><strong>2.</strong> Press <strong>ENTER</strong> or click <strong>TWIN</strong> for quick forecast (TWIN-)</p>
+          <p><strong>3.</strong> Press <strong>BACKSLASH (\\)</strong> or click <strong>Analyze with TWIN-</strong> for dual analysis (TWIN- and TWIN+)</p>
+          <p><strong>4.</strong> Click <strong>TWIN+</strong> button to run advanced ML forecast</p>
+          <p><strong>5.</strong> Use <strong>Explain</strong> buttons to see technical details and diagnostics</p>
+          <p><strong>6.</strong> Switch methods in TWIN+ by clicking the method dropdown</p>
+          <p><strong>7.</strong> Click the <strong>TWIN.</strong> logo or press <strong>TAB</strong> to clear chat</p>
+          <p><strong>8.</strong> Save predictions by clicking the star icon (requires login)</p>
+          <p style="margin-top:12px; font-size:0.9em;"><em>Theme: Click bottom-left circle to cycle themes</em></p>
         `;
         openModal('How to use TWIN', html);
         closeMenu();

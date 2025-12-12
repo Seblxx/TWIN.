@@ -790,6 +790,11 @@ def predict_plus():
     try:
         body = request.get_json(force=True) or {}
         user_input = body.get("input","")
+        method_override = body.get("method", None)  # Accept method parameter
+        
+        print(f"\n=== PREDICT_PLUS called ===")
+        print(f"Input: {user_input}")
+        print(f"Method override: {method_override}")
 
         ticker = detect_ticker(user_input)
         if not ticker:
@@ -833,11 +838,19 @@ def predict_plus():
         decision = ("Uptrend intact — longs allowed." if allow_long
                     else "Trend filters not aligned — reduce risk / avoid new longs.")
 
-        # Light ML forecast if duration present
+        # ML forecast if duration present - use method override if provided
         forecast_payload = {}
         if n is not None and unit is not None:
             horizon_days = horizon_to_trading_days(n, unit)
-            last_close_ml, forecast_ml, ml_method, ml_drift = light_ml_forecast(closes, horizon_days)
+            # Use method_override if provided, otherwise default to ridge_ml_v2
+            print(f"Forecasting with horizon_days={horizon_days}, method_override={method_override}")
+            if method_override and method_override != 'ridge_ml_v2':
+                print(f"Using forecast_with_method: {method_override}")
+                last_close_ml, forecast_ml, ml_method, ml_drift = forecast_with_method(closes, horizon_days, method_override)
+            else:
+                print("Using light_ml_forecast (ridge_ml_v2)")
+                last_close_ml, forecast_ml, ml_method, ml_drift = light_ml_forecast(closes, horizon_days)
+            print(f"Result: method={ml_method}, forecast={forecast_ml}, drift={ml_drift}")
             forecast_payload = {
                 "lastClose": round(last_close_ml,2),
                 "result": round(forecast_ml,2),
