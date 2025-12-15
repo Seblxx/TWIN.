@@ -54,7 +54,7 @@ COMPANY_TICKER_MAP = {
     "american express": "AXP",
     "visa": "V",
     "mastercard": "MA",
-    "berkshire hathaway": "BRK.B",
+    "berkshire hathaway": "BRK-B",
     "charles schwab": "SCHW",
     "blackrock": "BLK",
     "s&p global": "SPGI",

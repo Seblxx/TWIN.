@@ -361,14 +361,11 @@
     if (howBtn) {
       howBtn.addEventListener('click', () => {
         const html = `
-          <p><strong>1.</strong> Type a stock and timeframe: <em>"Apple in 5 days"</em></p>
-          <p><strong>2.</strong> Press <strong>ENTER</strong> or click <strong>TWIN</strong> for quick forecast (TWIN-)</p>
-          <p><strong>3.</strong> Press <strong>BACKSLASH (\\)</strong> or click <strong>Analyze with TWIN-</strong> for dual analysis (TWIN- and TWIN+)</p>
-          <p><strong>4.</strong> Click <strong>TWIN+</strong> button to run advanced ML forecast</p>
-          <p><strong>5.</strong> Use <strong>Explain</strong> buttons to see technical details and diagnostics</p>
-          <p><strong>6.</strong> Switch methods in TWIN+ by clicking the method dropdown</p>
-          <p><strong>7.</strong> Click the <strong>TWIN.</strong> logo or press <strong>TAB</strong> to clear chat</p>
-          <p><strong>8.</strong> Save predictions by clicking the star icon (requires login)</p>
+          <p>Type a stock and a time frame (e.g., <em>"Apple in 5 days"</em>).</p>
+          <p>Click <strong>TWIN</strong> for a dual panel prediction or press <strong>ENTER</strong> for a quick prediction.</p>
+          <p>You can use our stock and time selector presets if you just want to use it for fun.</p>
+          <p>You can clear the tabs by clicking on the <strong>TWIN.</strong> logo or accessing <strong>Clear</strong> from the menu.</p>
+          <p>When logged in, you can save predictions and access the predictions interface.</p>
           <p style="margin-top:12px; font-size:0.9em;"><em>Theme: Click bottom-left circle to cycle themes</em></p>
         `;
         openModal('How to use TWIN', html);

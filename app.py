@@ -336,6 +336,32 @@ def linear_trend_drift(series: pd.Series, window: int = 20) -> float:
     slope = float(np.polyfit(x, y, 1)[0])
     return slope
 
+def forecast_gbm(series: pd.Series, horizon_days: int) -> tuple[float, float, str, float]:
+    """
+    Geometric Brownian Motion forecast.
+    Estimates drift (mu) and volatility (sigma) from historical returns,
+    then projects price forward using: S_t = S_0 * exp(mu * t)
+    """
+    last_close = float(series.iloc[-1])
+    if len(series) < 2:
+        return last_close, last_close, "gbm", 0.0
+    
+    # Calculate daily log returns
+    log_returns = np.log(series / series.shift(1)).dropna()
+    if len(log_returns) < 2:
+        return last_close, last_close, "gbm", 0.0
+    
+    # Estimate drift (mu) and volatility (sigma)
+    mu = float(log_returns.mean())
+    sigma = float(log_returns.std())
+    
+    # Project forward using GBM formula: S_t = S_0 * exp(mu * t)
+    # For deterministic forecast, we use expected value without random component
+    forecast = last_close * np.exp(mu * horizon_days)
+    drift_per_day = (forecast - last_close) / max(horizon_days, 1)
+    
+    return last_close, float(forecast), "gbm", float(drift_per_day)
+
 # ----------------------- light ML style forecast ---------------------------
 def light_ml_forecast(series: pd.Series, horizon_days: int) -> tuple[float,float,str,float]:
     """
@@ -520,6 +546,8 @@ def forecast_with_method(series: pd.Series, horizon_days: int, method: str = "em
         drift = baseline_drift(series)
         forecast = last_close + drift * max(horizon_days, 0)
         return last_close, forecast, "baseline_drift", drift
+    if m == "gbm":
+        return forecast_gbm(series, horizon_days)
     # fallback
     last_close = float(series.iloc[-1])
     drift = ema_drift(series, span=6)
@@ -546,6 +574,8 @@ def backtest_mae(series: pd.Series, k_days: int, method: str = "ema_drift", look
             gap = ma - last_close_bt
             strength = min(1.0, k_days / 20.0)
             pred = last_close_bt + gap * strength
+        elif m == "gbm":
+            _, pred, _, _ = forecast_gbm(hist, k_days)
         else:  # baseline_drift or unknown
             d = baseline_drift(hist)
             pred = float(hist.iloc[-1]) + d * k_days

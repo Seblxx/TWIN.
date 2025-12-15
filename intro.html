@@ -762,6 +762,14 @@
               
               if (error) throw error;
               
+              // Clear any existing session data to ensure fresh start
+              localStorage.removeItem('twin_predictions');
+              localStorage.removeItem('twin_chat_history');
+              sessionStorage.clear();
+              
+              // Set flag to clear chat DOM on next page load
+              localStorage.setItem('clear_chat_on_load', 'true');
+              
               // Store session and username
               const displayName = data.user.user_metadata?.username || email.split('@')[0];
               localStorage.setItem('twin_user_logged_in', 'true');
@@ -787,6 +795,14 @@
           // Demo mode - simple validation
           const displayName = isSignupMode ? username : email.split('@')[0];
           if ((email.includes('@') || email.length > 2) && password.length >= 4) {
+            // Clear any existing session data to ensure fresh start
+            localStorage.removeItem('twin_predictions');
+            localStorage.removeItem('twin_chat_history');
+            sessionStorage.clear();
+            
+            // Set flag to clear chat DOM on next page load
+            localStorage.setItem('clear_chat_on_load', 'true');
+            
             localStorage.setItem('twin_user_logged_in', 'true');
             localStorage.setItem('twin_user_email', email);
             localStorage.setItem('twin_user_name', displayName);

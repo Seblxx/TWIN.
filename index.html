@@ -522,6 +522,16 @@
       const themeName = theme.replace('.css', '');
       document.body.setAttribute('data-theme', themeName);
       
+      // Clear chat DOM if coming from fresh login
+      if (localStorage.getItem('clear_chat_on_load') === 'true') {
+        localStorage.removeItem('clear_chat_on_load');
+        // Clear all chat messages
+        const messagesBasic = document.getElementById('messages-basic');
+        const messagesPlus = document.getElementById('messages-plus');
+        if (messagesBasic) messagesBasic.innerHTML = '';
+        if (messagesPlus) messagesPlus.innerHTML = '';
+      }
+      
       // Load predictions on page load to enable PREDICTIONS button
       if (window.getSavedPredictions) {
         window.getSavedPredictions().then(predictions => {

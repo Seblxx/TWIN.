@@ -1,0 +1,62 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - textbox "Enter a stock and a duration to receive a prediction e.g., Apple in 3 days, NVDA next week" [ref=e6]
+          - button "TWIN" [ref=e7] [cursor=pointer]
+        - button "Analyze with TWIN-" [ref=e8] [cursor=pointer]
+      - generic [ref=e9]:
+        - heading "TWIN." [level=1] [ref=e10] [cursor=pointer]
+        - generic [ref=e11]: 
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - heading "TWIN-" [level=2] [ref=e15]
+          - paragraph [ref=e16]: Quick Prediction
+        - generic [ref=e18]:
+          - generic [ref=e19]: berkshire hathway in 3 days?
+          - generic [ref=e20]: Berkshire Hathaway in 3 days?
+          - generic [ref=e22]:
+            - generic [ref=e23]: Did you mean?
+            - generic [ref=e24]:
+              - button "BRK.B Berkshire Hathaway" [ref=e25] [cursor=pointer]:
+                - strong [ref=e26]: BRK.B
+                - generic [ref=e27]: Berkshire Hathaway
+              - button "HSY Hershey" [ref=e28] [cursor=pointer]:
+                - strong [ref=e29]: HSY
+                - generic [ref=e30]: Hershey
+              - button "SCHW Charles Schwab" [ref=e31] [cursor=pointer]:
+                - strong [ref=e32]: SCHW
+                - generic [ref=e33]: Charles Schwab
+            - button "Retry" [ref=e34] [cursor=pointer]
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - heading "TWIN+" [level=2] [ref=e37]
+          - paragraph [ref=e38]: ML + Diagnostics
+        - generic [ref=e40]:
+          - generic [ref=e41]: berkshire hathway in 3 days?
+          - generic [ref=e43]:
+            - generic [ref=e44]: Did you mean?
+            - generic [ref=e45]:
+              - button "BRK.B Berkshire Hathaway" [ref=e46] [cursor=pointer]:
+                - strong [ref=e47]: BRK.B
+                - generic [ref=e48]: Berkshire Hathaway
+              - button "HSY Hershey" [ref=e49] [cursor=pointer]:
+                - strong [ref=e50]: HSY
+                - generic [ref=e51]: Hershey
+              - button "SCHW Charles Schwab" [ref=e52] [cursor=pointer]:
+                - strong [ref=e53]: SCHW
+                - generic [ref=e54]: Charles Schwab
+            - button "Retry" [ref=e55] [cursor=pointer]
+  - generic:
+    - button "HOME"
+    - button "CLEAR"
+    - button "PREDICTIONS" [disabled]
+    - button "HOW TO USE"
+    - button "TWIN?"
+  - button "Menu" [ref=e58] [cursor=pointer]
+```
