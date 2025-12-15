@@ -285,7 +285,7 @@
     // MY PREDICTIONS (leaderboard)
     const predsBtn = document.getElementById('menuPredictions');
     if (predsBtn) {
-      // Update button state based on login and database predictions
+      // Update button state based on localStorage (synced from database)
       function updatePredictionsButton() {
         const isLoggedIn = localStorage.getItem('twin_user_logged_in') === 'true';
         
@@ -296,25 +296,24 @@
         
         predsBtn.style.display = '';
         
-        // Check database for predictions
-        if (window.getSavedPredictions) {
-          window.getSavedPredictions().then(predictions => {
-            const isEmpty = !predictions || predictions.length === 0;
-            predsBtn.style.opacity = isEmpty ? '0.4' : '1';
-            predsBtn.style.cursor = isEmpty ? 'not-allowed' : 'pointer';
-            predsBtn.disabled = isEmpty;
-          }).catch(() => {
-            predsBtn.style.opacity = '0.4';
-            predsBtn.style.cursor = 'not-allowed';
-            predsBtn.disabled = true;
-          });
+        // Check localStorage (already synced from database by getSavedPredictions)
+        let predictions = [];
+        try {
+          predictions = JSON.parse(localStorage.getItem('twin_predictions') || '[]');
+        } catch (e) {
+          predictions = [];
         }
+        
+        const isEmpty = predictions.length === 0;
+        predsBtn.style.opacity = isEmpty ? '0.4' : '1';
+        predsBtn.style.cursor = isEmpty ? 'not-allowed' : 'pointer';
+        predsBtn.disabled = isEmpty;
       }
       
       // Initial update
       updatePredictionsButton();
       
-      // Update when predictions change
+      // Update when predictions change (events dispatched from getSavedPredictions)
       window.addEventListener('predictionsSaved', updatePredictionsButton);
       window.addEventListener('predictionsCleared', updatePredictionsButton);
       window.addEventListener('predictionDeleted', updatePredictionsButton);

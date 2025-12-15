@@ -647,10 +647,13 @@ function getSavedPredictions() {
           }));
           // Update localStorage for instant button feedback
           localStorage.setItem('twin_predictions', JSON.stringify(predictions));
+          // Dispatch event to update predictions button
+          window.dispatchEvent(new Event('predictionsSaved'));
           return predictions;
         }
         // If no predictions or invalid response, return empty array
         localStorage.setItem('twin_predictions', '[]');
+        window.dispatchEvent(new Event('predictionsCleared'));
         return [];
       })
       .catch(error => {
