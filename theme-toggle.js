@@ -285,46 +285,36 @@
     // MY PREDICTIONS (leaderboard)
     const predsBtn = document.getElementById('menuPredictions');
     if (predsBtn) {
-      // Update button state based on login and saved predictions
+      // Update button state based on login and database predictions
       function updatePredictionsButton() {
         const isLoggedIn = localStorage.getItem('twin_user_logged_in') === 'true';
         
         if (!isLoggedIn) {
-          // HIDE button completely when not logged in
           predsBtn.style.display = 'none';
           return;
         }
         
-        // Show button when logged in
         predsBtn.style.display = '';
         
-        // INSTANT check using localStorage (single source of truth)
-        let localPredictions = [];
-        try {
-          localPredictions = JSON.parse(localStorage.getItem('twin_predictions') || '[]');
-          if (!Array.isArray(localPredictions)) {
-            localPredictions = [];
-          }
-        } catch (e) {
-          console.error('Failed to parse predictions from localStorage:', e);
-          localPredictions = [];
-          localStorage.setItem('twin_predictions', '[]');
+        // Check database for predictions
+        if (window.getSavedPredictions) {
+          window.getSavedPredictions().then(predictions => {
+            const isEmpty = !predictions || predictions.length === 0;
+            predsBtn.style.opacity = isEmpty ? '0.4' : '1';
+            predsBtn.style.cursor = isEmpty ? 'not-allowed' : 'pointer';
+            predsBtn.disabled = isEmpty;
+          }).catch(() => {
+            predsBtn.style.opacity = '0.4';
+            predsBtn.style.cursor = 'not-allowed';
+            predsBtn.disabled = true;
+          });
         }
-        
-        const isEmpty = localPredictions.length === 0;
-        predsBtn.style.opacity = isEmpty ? '0.4' : '1';
-        predsBtn.style.cursor = isEmpty ? 'not-allowed' : 'pointer';
-        predsBtn.disabled = isEmpty;
-        
-        // No backend validation to prevent flicker - localStorage is source of truth
-        // Backend sync happens on page load via getPredictions()
       }
       
       // Initial update
       updatePredictionsButton();
       
-      // Update when storage changes (e.g., when predictions are saved)
-      window.addEventListener('storage', updatePredictionsButton);
+      // Update when predictions change
       window.addEventListener('predictionsSaved', updatePredictionsButton);
       window.addEventListener('predictionsCleared', updatePredictionsButton);
       window.addEventListener('predictionDeleted', updatePredictionsButton);
