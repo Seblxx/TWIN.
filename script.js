@@ -33,19 +33,13 @@ function renderSparkline(ticker, container) {
         return `${x},${y}`;
       }).join(' ');
       
-      // Create SVG with gradient
+      // Create SVG with solid white stroke
       container.innerHTML = `
         <svg width="240" height="60" viewBox="0 0 ${width} ${height}" style="display: block; margin: 8px 0; opacity: 1;">
-          <defs>
-            <linearGradient id="lineGradient-${ticker}" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" style="stop-color: rgba(255, 255, 255, 0.3); stop-opacity: 1" />
-              <stop offset="100%" style="stop-color: rgba(255, 255, 255, 0.8); stop-opacity: 1" />
-            </linearGradient>
-          </defs>
           <polyline
             points="${points}"
             fill="none"
-            stroke="url(#lineGradient-${ticker})"
+            stroke="rgba(255, 255, 255, 0.9)"
             stroke-width="1.5"
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -62,34 +56,63 @@ function renderSparkline(ticker, container) {
 
 function selectStock(name, ticker) {
   selectedStock = ticker;
-  document.getElementById('userInput').value = name;
-  document.getElementById('stockSuggestions').style.display = 'none';
-  document.getElementById('durationPresets').style.display = 'flex';
-  document.getElementById('userInput').placeholder = `Now select a duration for ${name}...`;
+  const userInput = document.getElementById('userInput');
+  const suggestions = document.getElementById('stockSuggestions');
+  const presets = document.getElementById('durationPresets');
+  
+  if (!userInput || !suggestions || !presets) {
+    console.error('Required elements not found');
+    return;
+  }
+  
+  userInput.value = name;
+  suggestions.style.display = 'none';
+  presets.style.display = 'flex';
+  userInput.placeholder = `Now select a duration for ${name}...`;
 }
 
 function selectDuration(duration) {
   selectedDuration = duration;
   const input = document.getElementById('userInput');
+  const presets = document.getElementById('durationPresets');
+  
+  if (!input || !presets) {
+    console.error('Required elements not found');
+    return;
+  }
+  
   input.value = `${input.value} in ${duration}`;
-  document.getElementById('durationPresets').style.display = 'none';
+  presets.style.display = 'none';
   // Auto-submit
   setTimeout(() => sendTwin(), 300);
 }
 
 // Show/hide suggestions on input focus
-document.addEventListener('DOMContentLoaded', () => {
-  // Clear messages on fresh navigation from intro (not from predictions back button)
-  const fromPredictions = document.referrer.includes('predictions.html');
-  if (!fromPredictions && !localStorage.getItem('twin_user_logged_in')) {
-    // Fresh session - clear old messages for blank slate
-    localStorage.removeItem('twin_messages_basic');
-    localStorage.removeItem('twin_messages_plus');
-  }
+// Consolidated DOMContentLoaded - single initialization point
+if (!window.twinInitialized) {
+  window.twinInitialized = true;
   
-  const userInput = document.getElementById('userInput');
+  document.addEventListener('DOMContentLoaded', () => {
+    // Always start with a blank slate - clear old messages
+    const fromPredictions = document.referrer.includes('predictions.html');
+    if (!fromPredictions) {
+      // Fresh session from login or direct navigation - clear for blank slate
+      localStorage.removeItem('twin_messages_basic');
+      localStorage.removeItem('twin_messages_plus');
+    }
+    
+    // Restore messages
+    restoreMessages();
+    
+    const userInput = document.getElementById('userInput');
   const suggestions = document.getElementById('stockSuggestions');
   const presets = document.getElementById('durationPresets');
+  
+  // Add null checks to prevent crashes
+  if (!userInput || !suggestions || !presets) {
+    console.warn('Input elements not found on this page');
+    return;
+  }
   
   userInput.addEventListener('focus', () => {
     if (!userInput.value) {
@@ -114,7 +137,8 @@ document.addEventListener('DOMContentLoaded', () => {
       presets.style.display = 'none';
     }
   });
-});
+  });
+}
 
 function scrollDown(messagesEl, smooth = true){
   const scroller = messagesEl?.closest('.chatbox');
@@ -145,20 +169,385 @@ function restoreMessages() {
     const plusMessages = localStorage.getItem('twin_messages_plus');
     const isLoggedIn = localStorage.getItem('twin_user_logged_in') === 'true';
     
-    if (basicMessages) {
+    const basicPane = document.getElementById('messages-basic');
+    const plusPane = document.getElementById('messages-plus');
+    
+    if (basicMessages && basicPane) {
       let html = basicMessages;
       // Remove star buttons if not logged in
       if (!isLoggedIn) {
         html = html.replace(/<button[^>]*class="[^"]*star-save-btn[^"]*"[^>]*>[\s\S]*?<\/button>/g, '');
       }
-      document.getElementById('messages-basic').innerHTML = html;
+      basicPane.innerHTML = html;
+      // Re-attach event listeners for TWIN- messages
+      reattachMethodToggles(basicPane);
     }
-    if (plusMessages) {
-      document.getElementById('messages-plus').innerHTML = plusMessages;
+    if (plusMessages && plusPane) {
+      plusPane.innerHTML = plusMessages;
+      // Re-attach method toggle event listeners for restored messages
+      reattachMethodToggles(plusPane);
     }
   } catch (e) {
     console.error('Failed to restore messages:', e);
   }
+}
+
+// Re-attach event listeners to method toggles in restored messages
+function reattachMethodToggles(pane) {
+  if (!pane) return;
+  
+  console.log('reattachMethodToggles called for pane:', pane.id);
+  
+  pane.querySelectorAll('.bot').forEach((bot, index) => {
+    // Always re-attach since DOM is recreated from innerHTML
+    console.log(`Processing bot ${index}:`, bot);
+    
+    const toggleEl = bot.querySelector('.method-toggle');
+    const menuEl = bot.querySelector('.method-menu');
+    
+    if (toggleEl && menuEl) {
+      console.log(`Found method toggle for bot ${index}`);
+      toggleEl.addEventListener('click', () => {
+        toggleEl.classList.remove('tap');
+        void toggleEl.offsetWidth;
+        toggleEl.classList.add('tap');
+
+        const hidden = menuEl.classList.contains('hidden');
+        const currentText = toggleEl.textContent;
+        const methodMatch = currentText.match(/Method: (.+?) · drift/);
+        const driftMatch = currentText.match(/drift\/day: ([\d.]+)/);
+        
+        if (hidden){
+          menuEl.classList.remove('hidden');
+          toggleEl.setAttribute('aria-expanded','true');
+          if (methodMatch && driftMatch) {
+            toggleEl.textContent = `Method: ${methodMatch[1]} · drift/day: ${driftMatch[1]} ▴`;
+          }
+        } else {
+          menuEl.classList.add('hidden');
+          toggleEl.setAttribute('aria-expanded','false');
+          if (methodMatch && driftMatch) {
+            toggleEl.textContent = `Method: ${methodMatch[1]} · drift/day: ${driftMatch[1]} ▾`;
+          }
+        }
+        scrollDown(pane, true);
+      });
+      
+      toggleEl.addEventListener('animationend', (e) => {
+        if (e.animationName === 'method-tap') {
+          toggleEl.classList.remove('tap');
+        }
+      });
+      
+      // Re-attach method button clicks
+      const userMsgEl = bot.previousElementSibling;
+      const originalQuery = userMsgEl && userMsgEl.classList.contains('user') ? userMsgEl.textContent.trim().replace(/\?$/, '') : null;
+      
+      if (originalQuery) {
+        menuEl.querySelectorAll('.method-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const selectedMethod = btn.getAttribute('data-method');
+            const currentActive = menuEl.querySelector('.method-btn.active');
+            if (!selectedMethod || (currentActive && selectedMethod === currentActive.getAttribute('data-method'))) return;
+            
+            const nextSibling = bot.nextElementSibling;
+            let userMsg = bot.previousElementSibling;
+            while (userMsg && !userMsg.classList.contains('user')) {
+              userMsg = userMsg.previousElementSibling;
+            }
+            
+            bot.remove();
+            if (userMsg) userMsg.remove();
+            
+            sendPlusAtPosition(originalQuery, selectedMethod, nextSibling, pane);
+          });
+        });
+      }
+    }
+    
+    // Re-attach TWIN+ explain button (front face)
+    const explainBtnFront = bot.querySelector('.front .explain-btn');
+    const explainPanelFront = bot.querySelector('.front .technical-details');
+    console.log(`Bot ${index} - TWIN+ explain:`, !!explainBtnFront, !!explainPanelFront);
+    if (explainBtnFront && explainPanelFront) {
+      explainBtnFront.addEventListener('click', (e) => {
+        console.log('TWIN+ Explain clicked');
+        e.stopPropagation();
+        const isHidden = explainPanelFront.classList.contains('hidden');
+        if (isHidden) {
+          // Check if panel has content, if not show message
+          if (!explainPanelFront.innerHTML.trim() || explainPanelFront.innerHTML.trim() === '') {
+            const userMsgEl = bot.previousElementSibling;
+            const query = userMsgEl && userMsgEl.classList.contains('user') ? userMsgEl.textContent.trim().replace(/\?$/, '') : null;
+            explainPanelFront.innerHTML = `
+              <div class="muted" style="padding: 12px;">
+                Diagnostic details are not available for restored sessions.
+                <div style="margin-top: 8px; display: flex; gap: 8px;">
+                  ${query ? '<button class="reload-query-btn action-btn" style="padding: 6px 12px; font-size: 13px;">Reload Query</button>' : ''}
+                  <button class="clear-query-btn action-btn" style="padding: 6px 12px; font-size: 13px;">Clear</button>
+                </div>
+              </div>
+            `;
+            
+            // Attach reload button
+            const reloadBtn = explainPanelFront.querySelector('.reload-query-btn');
+            if (reloadBtn && query) {
+              reloadBtn.addEventListener('click', () => {
+                const nextSibling = bot.nextElementSibling;
+                let userMsg = bot.previousElementSibling;
+                while (userMsg && !userMsg.classList.contains('user')) {
+                  userMsg = userMsg.previousElementSibling;
+                }
+                bot.remove();
+                if (userMsg) userMsg.remove();
+                sendPlusAtPosition(query, null, nextSibling, pane);
+              });
+            }
+            
+            // Attach clear button
+            const clearBtn = explainPanelFront.querySelector('.clear-query-btn');
+            if (clearBtn) {
+              clearBtn.addEventListener('click', () => {
+                let userMsg = bot.previousElementSibling;
+                while (userMsg && !userMsg.classList.contains('user')) {
+                  userMsg = userMsg.previousElementSibling;
+                }
+                bot.remove();
+                if (userMsg) userMsg.remove();
+              });
+            }
+          }
+          explainPanelFront.classList.remove('hidden');
+          explainPanelFront.classList.add('fade');
+          explainBtnFront.textContent = 'Hide';
+        } else {
+          explainPanelFront.classList.add('hidden');
+          explainBtnFront.textContent = 'Explain';
+        }
+      });
+    }
+    
+    // Re-attach TWIN- explain button
+    const explainBtn = bot.querySelector('.explain-btn');
+    const explainPanel = bot.querySelector('.explain');
+    console.log(`Bot ${index} - TWIN- explain:`, !!explainBtn, !!explainPanel, !bot.querySelector('.front'));
+    if (explainBtn && explainPanel && !bot.querySelector('.front')) {
+      explainBtn.addEventListener('click', (e) => {
+        console.log('TWIN- Explain clicked');
+        e.stopPropagation();
+        const isHidden = explainPanel.classList.contains('hidden');
+        if (isHidden) {
+          // Check if panel has content
+          if (!explainPanel.innerHTML.trim() || explainPanel.innerHTML.trim() === '') {
+            const userMsgEl = bot.previousElementSibling;
+            const query = userMsgEl && userMsgEl.classList.contains('user') ? userMsgEl.textContent.trim().replace(/\?$/, '') : null;
+            const basicPane = document.getElementById('messages-basic');
+            explainPanel.innerHTML = `
+              <div class="muted" style="padding: 12px;">
+                Explanation is not available for restored sessions.
+                <div style="margin-top: 8px; display: flex; gap: 8px;">
+                  ${query ? '<button class="reload-query-btn action-btn" style="padding: 6px 12px; font-size: 13px;">Reload Query</button>' : ''}
+                  <button class="clear-query-btn action-btn" style="padding: 6px 12px; font-size: 13px;">Clear</button>
+                </div>
+              </div>
+            `;
+            
+            // Attach reload button
+            const reloadBtn = explainPanel.querySelector('.reload-query-btn');
+            if (reloadBtn && query) {
+              reloadBtn.addEventListener('click', () => {
+                const nextSibling = bot.nextElementSibling;
+                let userMsg = bot.previousElementSibling;
+                while (userMsg && !userMsg.classList.contains('user')) {
+                  userMsg = userMsg.previousElementSibling;
+                }
+                bot.remove();
+                if (userMsg) userMsg.remove();
+                sendBasicAtPosition(query, nextSibling, basicPane);
+              });
+            }
+            
+            // Attach clear button
+            const clearBtn = explainPanel.querySelector('.clear-query-btn');
+            if (clearBtn) {
+              clearBtn.addEventListener('click', () => {
+                let userMsg = bot.previousElementSibling;
+                while (userMsg && !userMsg.classList.contains('user')) {
+                  userMsg = userMsg.previousElementSibling;
+                }
+                bot.remove();
+                if (userMsg) userMsg.remove();
+              });
+            }
+          }
+          explainPanel.classList.remove('hidden');
+          explainPanel.style.display = '';
+          explainPanel.classList.remove('fade');
+          explainPanel.offsetWidth;
+          explainPanel.classList.add('fade');
+          explainBtn.textContent = 'Hide';
+        } else {
+          explainPanel.classList.add('hidden');
+          explainPanel.style.display = 'none';
+          explainBtn.textContent = 'Explain';
+        }
+      });
+    }
+    
+    // Re-attach TWIN* button
+    const starBtn = bot.querySelector('.star-btn');
+    console.log(`Bot ${index} - TWIN* button:`, !!starBtn);
+    if (starBtn) {
+      starBtn.addEventListener('click', (e) => {
+        console.log('TWIN* button clicked');
+        e.stopPropagation();
+        showComingSoonModal();
+      });
+    }
+    
+    // Re-attach TWIN+ button (in TWIN- messages)
+    const plusBtn = bot.querySelector('.plus-btn');
+    console.log(`Bot ${index} - TWIN+ button:`, !!plusBtn);
+    if (plusBtn) {
+      const userMsgEl = bot.previousElementSibling;
+      const query = userMsgEl && userMsgEl.classList.contains('user') ? userMsgEl.textContent.trim().replace(/\?$/, '') : null;
+      if (query) {
+        plusBtn.addEventListener('click', () => sendPlus(query));
+      }
+    }
+    
+    // Re-attach star save button
+    const saveBtn = bot.querySelector('.star-save-btn');
+    console.log(`Bot ${index} - Star save button:`, !!saveBtn);
+    if (saveBtn) {
+      const predId = saveBtn.getAttribute('data-pred-id');
+      const starIcon = saveBtn.querySelector('i');
+      
+      // Check if already saved
+      getSavedPredictions().then(savedPredictions => {
+        const isSaved = savedPredictions.some(p => p.id == predId);
+        if (isSaved) {
+          starIcon.className = 'fas fa-star';
+          saveBtn.disabled = true;
+          saveBtn.style.opacity = '0.6';
+          saveBtn.style.cursor = 'not-allowed';
+          saveBtn.title = 'Prediction saved';
+        }
+      });
+      
+      saveBtn.addEventListener('click', async () => {
+        const isStarred = saveBtn.disabled;
+        
+        if (isStarred) {
+          // UNSTAR
+          const token = localStorage.getItem('twin_supabase_token');
+          if (token) {
+            try {
+              const response = await fetch(`/api/predictions/delete/${predId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              const result = await response.json();
+              if (result.success) {
+                starIcon.className = 'far fa-star';
+                saveBtn.disabled = false;
+                saveBtn.style.opacity = '1';
+                saveBtn.style.cursor = 'pointer';
+                saveBtn.title = 'Save this prediction';
+              }
+            } catch (err) {
+              console.error('Failed to unstar:', err);
+            }
+          } else {
+            // Remove from localStorage
+            const saved = JSON.parse(localStorage.getItem('twin_predictions') || '[]');
+            const filtered = saved.filter(p => p.id != predId);
+            localStorage.setItem('twin_predictions', JSON.stringify(filtered));
+            starIcon.className = 'far fa-star';
+            saveBtn.disabled = false;
+            saveBtn.style.opacity = '1';
+            saveBtn.style.cursor = 'pointer';
+            saveBtn.title = 'Save this prediction';
+          }
+        } else {
+          // STAR - Parse data from the bot message HTML
+          const titleEl = bot.querySelector('.title');
+          const lastCloseEl = bot.querySelector('div:nth-child(2)');
+          const forecastEl = bot.querySelector('div:nth-child(3)');
+          
+          if (titleEl && lastCloseEl && forecastEl) {
+            const stock = titleEl.textContent.split(' in ')[0].trim();
+            const duration = titleEl.textContent.includes(' in ') ? titleEl.textContent.split(' in ')[1].trim() : '';
+            const lastClose = parseFloat(lastCloseEl.textContent.match(/\$([\d.]+)/)?.[1] || '0');
+            const forecast = parseFloat(forecastEl.textContent.match(/\$([\d.]+)/)?.[1] || '0');
+            
+            // Check if we have valid data (if it's 0, it's probably from restored localStorage)
+            if (lastClose === 0 || forecast === 0) {
+              // Show warning that data is not available from restored session
+              const userMsgEl = bot.previousElementSibling;
+              const query = userMsgEl && userMsgEl.classList.contains('user') ? userMsgEl.textContent.trim().replace(/\?$/, '') : null;
+              
+              // Create modal or alert
+              const warningDiv = document.createElement('div');
+              warningDiv.className = 'muted';
+              warningDiv.style.cssText = 'padding: 12px; margin-top: 8px; background: rgba(0,0,0,0.3); border-radius: 4px;';
+              warningDiv.innerHTML = `
+                Saving predictions is not available for restored sessions.
+                <div style="margin-top: 8px; display: flex; gap: 8px;">
+                  ${query ? '<button class="reload-query-btn action-btn" style="padding: 6px 12px; font-size: 13px;">Reload Query</button>' : ''}
+                  <button class="dismiss-warning-btn action-btn" style="padding: 6px 12px; font-size: 13px;">Dismiss</button>
+                </div>
+              `;
+              
+              // Insert warning after the star button
+              saveBtn.parentElement.appendChild(warningDiv);
+              
+              // Attach reload button
+              const reloadBtn = warningDiv.querySelector('.reload-query-btn');
+              if (reloadBtn && query) {
+                reloadBtn.addEventListener('click', () => {
+                  const nextSibling = bot.nextElementSibling;
+                  let userMsg = bot.previousElementSibling;
+                  while (userMsg && !userMsg.classList.contains('user')) {
+                    userMsg = userMsg.previousElementSibling;
+                  }
+                  bot.remove();
+                  if (userMsg) userMsg.remove();
+                  sendBasicAtPosition(query, nextSibling, pane);
+                });
+              }
+              
+              // Attach dismiss button
+              const dismissBtn = warningDiv.querySelector('.dismiss-warning-btn');
+              if (dismissBtn) {
+                dismissBtn.addEventListener('click', () => {
+                  warningDiv.remove();
+                });
+              }
+              
+              return; // Don't save the prediction
+            }
+            
+            const pred = {
+              id: predId,
+              stock: stock,
+              duration: duration,
+              lastClose: lastClose,
+              forecast: forecast,
+              timestamp: Date.now()
+            };
+            
+            savePrediction(pred);
+            starIcon.className = 'fas fa-star';
+            saveBtn.disabled = true;
+            saveBtn.style.opacity = '0.6';
+            saveBtn.style.cursor = 'not-allowed';
+            saveBtn.title = 'Prediction saved';
+          }
+        }
+      });
+    }
+  });
 }
 
 function savePrediction(pred) {
@@ -191,6 +580,10 @@ function savePrediction(pred) {
     .then(data => {
       if (data.success) {
         console.log('Prediction saved to database:', pred);
+        // Update localStorage for instant button feedback
+        const saved = JSON.parse(localStorage.getItem('twin_predictions') || '[]');
+        saved.push(pred);
+        localStorage.setItem('twin_predictions', JSON.stringify(saved));
       } else {
         console.error('Failed to save prediction:', data.error);
         // Fallback to localStorage
@@ -205,6 +598,9 @@ function savePrediction(pred) {
       const saved = JSON.parse(localStorage.getItem('twin_predictions') || '[]');
       saved.push(pred);
       localStorage.setItem('twin_predictions', JSON.stringify(saved));
+    })
+    .finally(() => {
+      window.dispatchEvent(new Event('predictionsSaved'));
     });
   } catch (e) {
     console.error('Failed to save prediction:', e);
@@ -235,9 +631,9 @@ function getSavedPredictions() {
         return response.json();
       })
       .then(data => {
-        if (data.success) {
+        if (data.success && Array.isArray(data.predictions)) {
           // Convert database format to frontend format
-          return data.predictions.map(p => ({
+          const predictions = data.predictions.map(p => ({
             id: p.id,
             stock: p.stock,
             duration: p.duration,
@@ -249,7 +645,12 @@ function getSavedPredictions() {
             timestamp: p.timestamp,
             feedback: p.feedback
           }));
+          // Update localStorage for instant button feedback
+          localStorage.setItem('twin_predictions', JSON.stringify(predictions));
+          return predictions;
         }
+        // If no predictions or invalid response, return empty array
+        localStorage.setItem('twin_predictions', '[]');
         return [];
       })
       .catch(error => {
@@ -395,7 +796,14 @@ function showLeaderboard() {
 // Submit feedback for a prediction
 function submitFeedback(predId, feedback) {
   try {
-    const predictions = JSON.parse(localStorage.getItem('twin_predictions') || '[]');
+    let predictions = [];
+    try {
+      predictions = JSON.parse(localStorage.getItem('twin_predictions') || '[]');
+    } catch (e) {
+      console.error('Failed to parse predictions:', e);
+      localStorage.setItem('twin_predictions', '[]');
+      predictions = [];
+    }
     const predIndex = predictions.findIndex(p => p.id === predId);
     
     if (predIndex === -1) {
@@ -562,7 +970,15 @@ function showInaccuracyModal(predId, prediction) {
 // Complete feedback submission (called after inaccuracy modal for "no" or directly for "yes")
 function completeFeedbackSubmission(predId, feedback, inaccuracyData, notes) {
   try {
-    const predictions = JSON.parse(localStorage.getItem('twin_predictions') || '[]');
+    let predictions = [];
+    try {
+      predictions = JSON.parse(localStorage.getItem('twin_predictions') || '[]');
+    } catch (e) {
+      console.error('Failed to parse predictions:', e);
+      localStorage.setItem('twin_predictions', '[]');
+      showNotification('Error', 'Failed to load predictions. Storage has been reset.');
+      return;
+    }
     const predIndex = predictions.findIndex(p => p.id === predId);
     
     if (predIndex === -1) {
@@ -604,8 +1020,8 @@ function completeFeedbackSubmission(predId, feedback, inaccuracyData, notes) {
     // Show thank you message
     const thankYouMsg = document.createElement('div');
     thankYouMsg.className = 'feedback-thank-you';
-    thankYouMsg.innerHTML = '<p>âœ¨ Thank you for strengthening our model! âœ¨</p>';
-    thankYouMsg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(59,130,246,.95);color:#fff;padding:20px 40px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:10001;font-weight:700;font-size:18px;text-align:center;animation:fadeInScale .3s ease;';
+    thankYouMsg.innerHTML = '<p>✨ Thank you for strengthening our model! ✨</p>';
+    thankYouMsg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,.98);color:#1e293b;padding:20px 40px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.3);border:1px solid rgba(0,0,0,.1);z-index:10001;font-weight:700;font-size:18px;text-align:center;animation:fadeInScale .3s ease;';
     document.body.appendChild(thankYouMsg);
     
     setTimeout(() => {
@@ -627,13 +1043,22 @@ function completeFeedbackSubmission(predId, feedback, inaccuracyData, notes) {
 // Save messages periodically and before page unload
 window.addEventListener('beforeunload', saveMessages);
 
-// Restore messages when page loads
-window.addEventListener('DOMContentLoaded', () => {
-  restoreMessages();
-});
+// Restore messages when page loads - merged into main DOMContentLoaded above
+// (No separate listener needed to prevent duplicate calls)
 
-// Save messages every 5 seconds
-setInterval(saveMessages, 5000);
+// Save messages every 5 seconds - only if we have message panes
+let saveMessagesInterval = null;
+if (document.getElementById('messages-basic') || document.getElementById('messages-plus')) {
+  saveMessagesInterval = setInterval(saveMessages, 5000);
+  
+  // Clear interval on page unload
+  window.addEventListener('beforeunload', () => {
+    if (saveMessagesInterval) {
+      clearInterval(saveMessagesInterval);
+      saveMessagesInterval = null;
+    }
+  });
+}
 
 window.saveMessages = saveMessages;
 window.restoreMessages = restoreMessages;
@@ -676,7 +1101,7 @@ function showComingSoonModal() {
   const modalBody = modal.querySelector('.modal-body');
   
   modalHead.innerHTML = '<span>TWIN*</span>';
-  modalBody.innerHTML = '<p style="font-size: 18px; text-align: center; padding: 20px 0;">The Model is Coming Soon.</p>';
+  modalBody.innerHTML = '<p style="font-size: 18px; text-align: center; padding: 20px 0;">Our Model is Coming Soon!</p>';
   
   overlay.classList.add('open');
   setTimeout(() => overlay.classList.add('fade-in'), 10);
@@ -1590,6 +2015,7 @@ async function updateExistingForecast(bot, newMethod, query) {
 
 // Query blocking - prevent duplicate TWIN- queries
 let isBasicQueryRunning = false;
+let isPlusQueryRunning = false;
 
 async function sendBasic(methodOverride = null, reusedQuery = null) {
   console.log('sendBasic() called');
@@ -1601,6 +2027,12 @@ async function sendBasic(methodOverride = null, reusedQuery = null) {
   }
   
   const inputEl = document.getElementById('userInput');
+  if (!inputEl) {
+    console.error('userInput element not found');
+    isBasicQueryRunning = false;
+    return;
+  }
+  
   const q = (reusedQuery != null ? reusedQuery : (inputEl.value || '')).trim();
   if (!q) {
     console.log('No input provided');
@@ -1612,6 +2044,7 @@ async function sendBasic(methodOverride = null, reusedQuery = null) {
   const pane = document.getElementById('messages-basic');
   if (!pane) {
     console.error('messages-basic element not found');
+    isBasicQueryRunning = false;
     return;
   }
 
@@ -1663,10 +2096,14 @@ async function sendBasic(methodOverride = null, reusedQuery = null) {
         btn.addEventListener('click', () => {
           const echo = btn.getAttribute('data-echo');
           if (echo){
+            // Find and remove the user's misspelled message (previous sibling)
+            const userMsg = bot.previousElementSibling;
+            if (userMsg && userMsg.classList.contains('user')) {
+              userMsg.remove();
+            }
             // Clear the suggestion display
             bot.remove();
-            // Set input and rerun
-            inputEl.value = echo;
+            // Auto-run with corrected query
             sendBasic(null, echo);
           }
         });
@@ -1806,9 +2243,14 @@ async function sendBasic(methodOverride = null, reusedQuery = null) {
           }
           
           // Remove from localStorage
-          const saved = JSON.parse(localStorage.getItem('twin_predictions') || '[]');
-          const filtered = saved.filter(p => p.id != predId);
-          localStorage.setItem('twin_predictions', JSON.stringify(filtered));
+          try {
+            const saved = JSON.parse(localStorage.getItem('twin_predictions') || '[]');
+            const filtered = saved.filter(p => p && p.id != predId);
+            localStorage.setItem('twin_predictions', JSON.stringify(filtered));
+          } catch (e) {
+            console.error('Error updating localStorage after delete:', e);
+            localStorage.setItem('twin_predictions', '[]');
+          }
           
           // Reset star to empty
           starIcon.className = 'far fa-star';
@@ -1856,9 +2298,400 @@ async function sendBasic(methodOverride = null, reusedQuery = null) {
   inputEl.value = '';
 }
 
+async function sendBasicAtPosition(query, insertBeforeNode, pane) {
+  console.log('sendBasicAtPosition() called with:', query);
+  
+  const q = (query || '').trim();
+  if (!q) return;
+  
+  // Create and insert user message at the specified position
+  const user = document.createElement('div');
+  user.className = 'user';
+  user.textContent = q.endsWith('?') ? q : `${q}?`;
+  fade(user);
+  
+  if (insertBeforeNode && insertBeforeNode.parentNode === pane) {
+    pane.insertBefore(user, insertBeforeNode);
+  } else {
+    pane.appendChild(user);
+  }
+  
+  // Create and insert loading message
+  const loading = document.createElement('div');
+  loading.className = 'loading';
+  loading.innerHTML = '<span></span><span></span><span></span>';
+  
+  if (insertBeforeNode && insertBeforeNode.parentNode === pane) {
+    pane.insertBefore(loading, insertBeforeNode);
+  } else {
+    pane.appendChild(loading);
+  }
+  
+  scrollDown(pane, true);
+  
+  try {
+    const r = await fetch('https://twin-hz5k.onrender.com/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ input: q })
+    });
+    
+    const data = await r.json();
+    pane.removeChild(loading);
+    
+    const bot = document.createElement('div');
+    bot.className = 'bot';
+    
+    if (!r.ok || data.error) {
+      bot.innerHTML = `<div class="muted">${data.error || 'Request failed'}</div>`;
+      fade(bot);
+      if (insertBeforeNode && insertBeforeNode.parentNode === pane) {
+        pane.insertBefore(bot, insertBeforeNode);
+      } else {
+        pane.appendChild(bot);
+      }
+      scrollDown(pane, true);
+      return;
+    }
+    
+    // Check if price only
+    if (data.priceOnly) {
+      bot.innerHTML = `
+        <div class="title">${data.stock}</div>
+        <div>Last close: <strong>$${data.lastClose.toFixed(2)}</strong></div>
+        <div class="muted">${data.message || "Add a timeframe (e.g., 'in 3 days') to get a forecast."}</div>
+        <div class="sparkline"></div>
+        <div class="btnrow">
+          <button class="action-btn explain-btn" type="button">Explain</button>
+          <button class="action-btn plus-btn" type="button">TWIN+</button>
+        </div>
+        <div class="explain hidden"></div>
+      `;
+      fade(bot);
+      if (insertBeforeNode && insertBeforeNode.parentNode === pane) {
+        pane.insertBefore(bot, insertBeforeNode);
+      } else {
+        pane.appendChild(bot);
+      }
+      
+      attachExplain(bot.querySelector('.explain-btn'), bot.querySelector('.explain'), {
+        mode:'price_only', stock:data.stock, lastClose:data.lastClose
+      });
+      bot.querySelector('.plus-btn').addEventListener('click', () => sendPlus(q));
+      renderSparkline(data.stock, bot.querySelector('.sparkline'));
+      scrollDown(pane, true);
+      return;
+    }
+    
+    // Full forecast
+    const delta = data.result - data.lastClose;
+    const pct = (delta / data.lastClose) * 100;
+    const sign = delta >= 0 ? '+' : '';
+    const methodInfo = `<div class="muted small" style="margin: 8px 0;">Method: ${prettyMethodName(data.method)} · drift/day: ${Number(data.drift_per_day).toFixed(4)}</div>`;
+    const backtestRow = data.backtest ? `
+      <div class="backtest-row muted">Backtest: MAE ≈ <strong>$${data.backtest.mae.toFixed(2)}</strong> (120 days, ${data.duration} horizon)</div>
+    ` : '';
+    const isLoggedIn = localStorage.getItem('twin_user_logged_in') === 'true';
+    const starButtonHTML = isLoggedIn ? `
+      <button class="action-btn star-save-btn" type="button" title="Save this prediction" data-pred-id="${Date.now()}">
+        <i class="far fa-star"></i>
+      </button>
+    ` : '';
+    
+    bot.innerHTML = `
+      ${starButtonHTML}
+      <div class="title">${data.stock}${data.duration ? ' in ' + data.duration : ''}</div>
+      <div>Last close: <strong>$${data.lastClose.toFixed(2)}</strong></div>
+      <div>Forecasted price: <strong>$${data.result.toFixed(2)}</strong>
+        <span class="${delta>=0 ? 'up' : 'down'}">(${sign}${delta.toFixed(2)} | ${sign}${pct.toFixed(2)}%)</span>
+      </div>
+      ${methodInfo}
+      <div class="sparkline"></div>
+      <div class="btnrow">
+        <button class="action-btn explain-btn" type="button">Explain</button>
+        <button class="action-btn plus-btn" type="button">TWIN+</button>
+      </div>
+      ${backtestRow}
+      <div class="explain hidden"></div>
+    `;
+    
+    fade(bot);
+    if (insertBeforeNode && insertBeforeNode.parentNode === pane) {
+      pane.insertBefore(bot, insertBeforeNode);
+    } else {
+      pane.appendChild(bot);
+    }
+    
+    attachExplain(bot.querySelector('.explain-btn'), bot.querySelector('.explain'), {
+      mode:'forecast', stock:data.stock, duration:data.duration,
+      lastClose:data.lastClose, result:data.result,
+      delta:delta, pct:pct, method:data.method, driftPerDay:data.drift_per_day,
+      backtest:data.backtest || null
+    });
+    bot.querySelector('.plus-btn').addEventListener('click', () => sendPlus(q));
+    
+    // Wire star save button
+    const saveBtn = bot.querySelector('.star-save-btn');
+    if (saveBtn) {
+      const predId = saveBtn.getAttribute('data-pred-id');
+      const starIcon = saveBtn.querySelector('i');
+      
+      getSavedPredictions().then(savedPredictions => {
+        const isSaved = savedPredictions.some(p => p.id == predId);
+        if (isSaved) {
+          starIcon.className = 'fas fa-star';
+          saveBtn.disabled = true;
+          saveBtn.style.opacity = '0.6';
+          saveBtn.style.cursor = 'not-allowed';
+          saveBtn.title = 'Prediction saved';
+        }
+      });
+      
+      saveBtn.addEventListener('click', async () => {
+        savePrediction({
+          id: predId,
+          stock: data.stock,
+          duration: data.duration,
+          lastClose: data.lastClose,
+          predictedPrice: data.result,
+          method: data.method,
+          timestamp: new Date().toISOString(),
+          delta: delta,
+          pct: pct
+        });
+        
+        starIcon.className = 'fas fa-star';
+        saveBtn.disabled = true;
+        saveBtn.style.opacity = '0.6';
+        saveBtn.style.cursor = 'not-allowed';
+        saveBtn.title = 'Prediction saved';
+      });
+    }
+    
+    renderSparkline(data.stock, bot.querySelector('.sparkline'));
+    scrollDown(pane, true);
+    
+  } catch (err) {
+    console.error('Error in sendBasicAtPosition:', err);
+    if (pane.contains(loading)) {
+      pane.removeChild(loading);
+    }
+  }
+}
+
+
+async function sendPlusAtPosition(query, methodOverride, insertBeforeNode, pane) {
+  console.log('sendPlusAtPosition() called with:', query, 'method:', methodOverride);
+  
+  const q = (query || '').trim();
+  if (!q) return;
+  
+  // Create and insert user message at the specified position
+  const user = document.createElement('div');
+  user.className = 'user';
+  user.textContent = q;
+  fade(user);
+  
+  if (insertBeforeNode && insertBeforeNode.parentNode === pane) {
+    pane.insertBefore(user, insertBeforeNode);
+  } else {
+    pane.appendChild(user);
+  }
+  
+  // Create and insert loading message
+  const loading = document.createElement('div');
+  loading.className = 'loading';
+  loading.innerHTML = '<span></span><span></span><span></span>';
+  
+  if (insertBeforeNode && insertBeforeNode.parentNode === pane) {
+    pane.insertBefore(loading, insertBeforeNode);
+  } else {
+    pane.appendChild(loading);
+  }
+  
+  scrollDown(pane, true);
+  
+  try {
+    const r = await fetch('https://twin-hz5k.onrender.com/predict_plus', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ input: q, method: methodOverride || 'ridge_ml_v2' })
+    });
+    
+    const data = await r.json();
+    console.log('TWIN+ response data:', data);
+    pane.removeChild(loading);
+    
+    const bot = document.createElement('div');
+    bot.className = 'bot';
+    
+    if (!r.ok || data.error) {
+      bot.innerHTML = `<div class="muted">${data.error || 'Request failed'}</div>`;
+      fade(bot);
+      if (insertBeforeNode && insertBeforeNode.parentNode === pane) {
+        pane.insertBefore(bot, insertBeforeNode);
+      } else {
+        pane.appendChild(bot);
+      }
+      scrollDown(pane, true);
+      return;
+    }
+    
+    // Build the bot response (same as sendPlus)
+    const d = data.diagnostics || {};
+    const hasForecast = (data.result !== undefined) && (data.lastClose !== undefined);
+    let forecastBlock = '';
+    if (hasForecast){
+      const delta = data.result - data.lastClose;
+      const pct = (delta / data.lastClose) * 100;
+      const sign = delta >= 0 ? '+' : '';
+      const mlMethods = ['ridge_ml_v2', 'linear_trend', 'mean_reversion', 'gbm'];
+      const methodButtons = mlMethods.map(m => `
+        <button class="method-btn ${m === (data.method || 'ridge_ml_v2') ? 'active' : ''}" data-method="${m}" title="Switch to ${prettyMethodName(m)}">${prettyMethodName(m)}</button>
+      `).join('');
+      const methodToggle = `<span class="method-toggle" role="button" aria-expanded="false" title="Change model">Method: ${prettyMethodName(data.method || 'ridge_ml_v2')} · drift/day: ${Number(data.drift_per_day).toFixed(4)} ▾</span>`;
+      forecastBlock = `
+        <div>Forecasted price: <strong>$${data.result.toFixed(2)}</strong>
+          <span class="${delta>=0 ? 'up':'down'}">(${sign}${delta.toFixed(2)} | ${sign}${pct.toFixed(2)}%)</span>
+        </div>
+        <div class="method-row">
+          ${methodToggle}
+          <div class="method-menu hidden">${methodButtons}</div>
+        </div>
+      `;
+    }
+    const voltxt  = d.ann_vol_forecast != null ? `${(d.ann_vol_forecast*100).toFixed(1)}%` : 'n/a';
+    const sizetxt = d.position_size != null ? `${(d.position_size*100).toFixed(0)}%` : 'n/a';
+    const summaryLine = `<div class="plus-summary muted"><strong>${prettyMethodName(data.method)}</strong> | Momentum ${(d.momentum_12m*100).toFixed(1)}% | Vol ${voltxt} | Size ${sizetxt}</div>`;
+
+    bot.innerHTML = `
+      <div class="flip-card">
+        <div class="flip-inner">
+          <div class="face front">
+            <div class="title">${data.stock}${data.duration ? ' in ' + data.duration : ''}</div>
+            <div>Last close: <strong>$${data.lastClose ? data.lastClose.toFixed(2) : 'N/A'}</strong></div>
+            ${forecastBlock}
+            ${summaryLine}
+            <div class="btnrow">
+              <button class="action-btn explain-btn" type="button">Explain</button>
+              <button class="action-btn star-btn" type="button" title="Switch to TWIN* (heavy ML)" aria-label="Switch to TWIN* model">TWIN*</button>
+            </div>
+            <div class="technical-details hidden"></div>
+          </div>
+          <div class="face back">
+            <div class="flip-badge">TWIN*</div>
+            <div class="title">${data.stock}${data.duration ? ' in ' + data.duration : ''}</div>
+            <div class="muted">Heavy ML Ensemble</div>
+            <div id="twin-star-forecast" class="muted">Loading ensemble forecast...</div>
+            <div class="btnrow">
+              <button class="action-btn explain-btn" type="button">Explain</button>
+              <button class="action-btn plus-btn-back" type="button" title="Back to TWIN+" aria-label="Switch back to TWIN+">TWIN+</button>
+            </div>
+            <div class="explain hidden"></div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    fade(bot);
+    if (insertBeforeNode && insertBeforeNode.parentNode === pane) {
+      pane.insertBefore(bot, insertBeforeNode);
+    } else {
+      pane.appendChild(bot);
+    }
+    
+    scrollDown(pane, true);
+    
+    // Wire up all the event listeners (same as sendPlus)
+    const toggleEl = bot.querySelector('.method-toggle');
+    const menuEl = bot.querySelector('.method-menu');
+    if (toggleEl && menuEl) {
+      toggleEl.addEventListener('click', () => {
+        toggleEl.classList.remove('tap');
+        void toggleEl.offsetWidth;
+        toggleEl.classList.add('tap');
+        const hidden = menuEl.classList.contains('hidden');
+        if (hidden){
+          menuEl.classList.remove('hidden');
+          toggleEl.setAttribute('aria-expanded','true');
+          toggleEl.textContent = `Method: ${prettyMethodName(data.method || 'ridge_ml_v2')} · drift/day: ${Number(data.drift_per_day).toFixed(4)} ▴`;
+        } else {
+          menuEl.classList.add('hidden');
+          toggleEl.setAttribute('aria-expanded','false');
+          toggleEl.textContent = `Method: ${prettyMethodName(data.method || 'ridge_ml_v2')} · drift/day: ${Number(data.drift_per_day).toFixed(4)} ▾`;
+        }
+        scrollDown(pane,true);
+      });
+      
+      toggleEl.addEventListener('animationend', (e) => {
+        if (e.animationName === 'method-tap') {
+          toggleEl.classList.remove('tap');
+        }
+      });
+
+      menuEl.querySelectorAll('.method-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const selectedMethod = btn.getAttribute('data-method');
+          if (!selectedMethod || selectedMethod === (data.method || 'ridge_ml_v2')) return;
+          
+          const nextSibling = bot.nextElementSibling;
+          let userMsg = bot.previousElementSibling;
+          while (userMsg && !userMsg.classList.contains('user')) {
+            userMsg = userMsg.previousElementSibling;
+          }
+          
+          bot.remove();
+          if (userMsg) userMsg.remove();
+          
+          sendPlusAtPosition(q, selectedMethod, nextSibling, pane);
+        });
+      });
+    }
+
+    const detailsPanelFront = bot.querySelector('.front .technical-details');
+    const detailsBtnFront = bot.querySelector('.front .explain-btn');
+    if (detailsPanelFront && detailsBtnFront){
+      detailsBtnFront.addEventListener('click', () => {
+        const isHidden = detailsPanelFront.classList.contains('hidden');
+        if (isHidden) {
+          detailsPanelFront.innerHTML = `
+            <h4 class="explain-title">Technical Details</h4>
+            <ul class="metrics-list">
+              <li><strong>12m momentum:</strong> ${(d.momentum_12m*100)?.toFixed(2) || 'n/a'}%</li>
+              <li><strong>50/200 DMA slope:</strong> ${d.dma50_slope?.toFixed(4) || 'n/a'} / ${d.dma200_slope?.toFixed(4) || 'n/a'}</li>
+              <li><strong>Donchian 50:</strong> ${d.donchian50_breakout ? 'BREAKOUT' : 'range'}${(d.donchian50_lo && d.donchian50_hi) ? ` (range ${d.donchian50_lo?.toFixed(2)}–${d.donchian50_hi?.toFixed(2)})` : ''}</li>
+              <li><strong>Annualized vol (HAR-RV):</strong> ${d.ann_vol_forecast ? `${(d.ann_vol_forecast*100).toFixed(1)}%` : 'n/a'}</li>
+              <li><strong>Position size @ ${d.target_vol ? (d.target_vol*100).toFixed(0) : '20'}% target vol:</strong> ${d.position_size ? `${(d.position_size*100).toFixed(0)}%` : 'n/a'}</li>
+            </ul>
+            <div class="explain-decision small muted" style="margin-top: 8px;">${data.decision ? 'Summary: ' + data.decision : ''}</div>
+          `;
+          detailsPanelFront.classList.remove('hidden');
+          detailsPanelFront.classList.add('fade');
+          detailsBtnFront.textContent = 'Hide';
+        } else {
+          detailsPanelFront.classList.add('hidden');
+          detailsBtnFront.textContent = 'Explain';
+        }
+      });
+    }
+    
+  } catch (err) {
+    console.error('Error in sendPlusAtPosition:', err);
+    if (pane.contains(loading)) {
+      pane.removeChild(loading);
+    }
+  }
+}
 
 async function sendPlus(queryFromTwin = null, methodOverride = null) {
   console.log('sendPlus() called with:', queryFromTwin, 'method:', methodOverride);
+  
+  // Block if a TWIN+ query is already running
+  if (isPlusQueryRunning) {
+    console.log('TWIN+ query already running, blocking duplicate request');
+    return;
+  }
+  
   const inputEl = document.getElementById('userInput');
   const raw = (queryFromTwin ?? inputEl.value);
   const q = (raw || '').trim();
@@ -1866,6 +2699,8 @@ async function sendPlus(queryFromTwin = null, methodOverride = null) {
     console.log('No input in sendPlus');
     return;
   }
+  
+  isPlusQueryRunning = true;
 
   console.log('sendPlus input:', q);
   const pane = document.getElementById('messages-plus');
@@ -1877,13 +2712,17 @@ async function sendPlus(queryFromTwin = null, methodOverride = null) {
       <div class="title">Need a timeframe</div>
       <div class="muted">TWIN+ needs a horizon. Try: â€œ${q} in 3 daysâ€ or â€œ${q} next weekâ€.</div>
     `;
-    fade(warn); pane.appendChild(warn); scrollDown(pane, true); return;
+    fade(warn); pane.appendChild(warn); scrollDown(pane, true);
+    isPlusQueryRunning = false; // CRITICAL: Release lock before return
+    return;
   }
 
   const user = document.createElement('div');
   user.className = 'user';
   user.textContent = q.endsWith('?') ? q : `${q}?`;
-  fade(user); pane.appendChild(user); scrollDown(pane, true);
+  fade(user);
+  pane.appendChild(user);
+  scrollDown(pane, true);
 
   const loading = addLoading(pane);
 
@@ -1930,11 +2769,14 @@ async function sendPlus(queryFromTwin = null, methodOverride = null) {
         btn.addEventListener('click', () => {
           const echo = btn.getAttribute('data-echo');
           if (echo){
+            // Find and remove the user's misspelled message (previous sibling)
+            const userMsg = bot.previousElementSibling;
+            if (userMsg && userMsg.classList.contains('user')) {
+              userMsg.remove();
+            }
             // Clear the suggestion display
             bot.remove();
-            // Set input and rerun
-            const inputEl2 = document.getElementById('userInput');
-            inputEl2.value = echo;
+            // Auto-run with corrected query
             sendPlus(echo);
           }
         });
@@ -2121,19 +2963,21 @@ async function sendPlus(queryFromTwin = null, methodOverride = null) {
           
           console.log('Method button clicked:', selectedMethod, 'Original query:', q);
           
-          // Remove only this bot message to refresh just this query
-          bot.remove();
-          // Also remove the user message that came right before it
-          const userMessages = pane.querySelectorAll('.user');
-          if (userMessages.length > 0) {
-            const lastUserMsg = userMessages[userMessages.length - 1];
-            if (lastUserMsg && lastUserMsg.textContent.includes(q.split(' ').slice(0, 2).join(' '))) {
-              lastUserMsg.remove();
-            }
+          // Store the next sibling to insert at same position
+          const nextSibling = bot.nextElementSibling;
+          
+          // Find and remove the user message
+          let userMsg = bot.previousElementSibling;
+          while (userMsg && !userMsg.classList.contains('user')) {
+            userMsg = userMsg.previousElementSibling;
           }
           
-          // Re-call sendPlus with the selected method, using captured q from closure
-          sendPlus(q, selectedMethod);
+          // Remove bot and user messages
+          bot.remove();
+          if (userMsg) userMsg.remove();
+          
+          // Re-fetch at the same position
+          sendPlusAtPosition(q, selectedMethod, nextSibling, pane);
         });
       });
     }
@@ -2183,6 +3027,9 @@ async function sendPlus(queryFromTwin = null, methodOverride = null) {
     pane.removeChild(loading);
     const bot = document.createElement('div'); bot.className = 'bot';
     bot.textContent = 'Error: ' + e.message; fade(bot); pane.appendChild(bot); scrollDown(pane, true);
+  } finally {
+    // Always release the query lock
+    isPlusQueryRunning = false;
   }
 }
 
@@ -2437,7 +3284,7 @@ function clearChat() {
   console.log('Chat cleared');
 }
 
-// Make clearChat globally accessible
+// Make functions globally accessible
 window.clearChat = clearChat;
-
-
+window.getSavedPredictions = getSavedPredictions;
+window.savePrediction = savePrediction;

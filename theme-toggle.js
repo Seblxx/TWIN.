@@ -142,6 +142,8 @@
   }
 
   // ---- Init menu & actions ----
+  let homeButtonInterval = null;
+  
   function initMenu() {
     const btn = document.getElementById('menuBtn');
     const menu = document.getElementById('menuOptions');
@@ -173,20 +175,20 @@
       });
     }
 
-    // Click outside to close and return to index.html
+    // Click outside to close menu (without reloading page)
     document.addEventListener('click', (e) => {
       if (menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
         closeMenu();
-        window.location.replace('index.html');
       }
     });
 
-    // Allow clicking the menu overlay to close the menu and return to index.html
+    // Menu overlay click to close (without reloading page)
     const menuOv = document.getElementById('menuOverlay');
     if (menuOv) {
-      menuOv.addEventListener('click', () => {
+      menuOv.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         closeMenu();
-        window.location.replace('index.html');
       });
     }
 
@@ -200,7 +202,12 @@
       }
       
       updateHomeButtonText();
-      setInterval(updateHomeButtonText, 500);
+      
+      // Clear previous interval if exists
+      if (homeButtonInterval) {
+        clearInterval(homeButtonInterval);
+      }
+      homeButtonInterval = setInterval(updateHomeButtonText, 500);
       
       homeBtn.addEventListener('click', () => {
         const isLoggedIn = localStorage.getItem('twin_user_logged_in') === 'true';
@@ -281,42 +288,36 @@
       // Update button state based on login and saved predictions
       function updatePredictionsButton() {
         const isLoggedIn = localStorage.getItem('twin_user_logged_in') === 'true';
-        // Always show the button, just disable it when not logged in or no predictions
-        predsBtn.style.display = '';
         
         if (!isLoggedIn) {
-          // Dim and disable when not logged in
-          predsBtn.style.opacity = '0.4';
-          predsBtn.style.cursor = 'not-allowed';
-          predsBtn.disabled = true;
-        } else {
-          // Check if there are saved predictions (from database or localStorage)
-          if (window.getSavedPredictions) {
-            window.getSavedPredictions().then(predictions => {
-              if (predictions && predictions.length === 0) {
-                // Dim and disable if no predictions
-                predsBtn.style.opacity = '0.4';
-                predsBtn.style.cursor = 'not-allowed';
-                predsBtn.disabled = true;
-              } else {
-                // Enable if predictions exist
-                predsBtn.style.opacity = '1';
-                predsBtn.style.cursor = 'pointer';
-                predsBtn.disabled = false;
-              }
-            }).catch(() => {
-              // Fallback to localStorage check on error
-              const predictions = JSON.parse(localStorage.getItem('twin_predictions') || '[]');
-              predsBtn.disabled = predictions.length === 0;
-              predsBtn.style.opacity = predictions.length === 0 ? '0.4' : '1';
-            });
-          } else {
-            // Fallback to localStorage if getSavedPredictions not available
-            const predictions = JSON.parse(localStorage.getItem('twin_predictions') || '[]');
-            predsBtn.disabled = predictions.length === 0;
-            predsBtn.style.opacity = predictions.length === 0 ? '0.4' : '1';
-          }
+          // HIDE button completely when not logged in
+          predsBtn.style.display = 'none';
+          return;
         }
+        
+        // Show button when logged in
+        predsBtn.style.display = '';
+        
+        // INSTANT check using localStorage (single source of truth)
+        let localPredictions = [];
+        try {
+          localPredictions = JSON.parse(localStorage.getItem('twin_predictions') || '[]');
+          if (!Array.isArray(localPredictions)) {
+            localPredictions = [];
+          }
+        } catch (e) {
+          console.error('Failed to parse predictions from localStorage:', e);
+          localPredictions = [];
+          localStorage.setItem('twin_predictions', '[]');
+        }
+        
+        const isEmpty = localPredictions.length === 0;
+        predsBtn.style.opacity = isEmpty ? '0.4' : '1';
+        predsBtn.style.cursor = isEmpty ? 'not-allowed' : 'pointer';
+        predsBtn.disabled = isEmpty;
+        
+        // No backend validation to prevent flicker - localStorage is source of truth
+        // Backend sync happens on page load via getPredictions()
       }
       
       // Initial update
@@ -324,9 +325,9 @@
       
       // Update when storage changes (e.g., when predictions are saved)
       window.addEventListener('storage', updatePredictionsButton);
-      
-      // Also update periodically since localStorage changes in same tab don't trigger storage event
-      setInterval(updatePredictionsButton, 1000);
+      window.addEventListener('predictionsSaved', updatePredictionsButton);
+      window.addEventListener('predictionsCleared', updatePredictionsButton);
+      window.addEventListener('predictionDeleted', updatePredictionsButton);
       
       predsBtn.addEventListener('click', () => {
         if (!predsBtn.disabled) {
@@ -367,6 +368,7 @@
           <p>You can clear the tabs by clicking on the <strong>TWIN.</strong> logo or accessing <strong>Clear</strong> from the menu.</p>
           <p>When logged in, you can save predictions and access the predictions interface.</p>
           <p style="margin-top:12px; font-size:0.9em;"><em>Theme: Click bottom-left circle to cycle themes</em></p>
+          <p style="margin-top:12px; font-size:0.9em; opacity:0.8;"><strong>Note:</strong> It's preferred to clear your board after returning from predictions to avoid issues, though you can still use and navigate the app.</p>
         `;
         openModal('How to use TWIN', html);
         closeMenu();

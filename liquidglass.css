@@ -221,10 +221,16 @@ body{
 .card-plus .card-head .muted{ color: rgba(0,0,0,.6); }
 
 
-.chatbox.big{ height:500px; overflow:auto; padding:14px 16px; }
+.chatbox.big{ height:500px; overflow:auto; padding:14px 16px; scrollbar-width: none; -ms-overflow-style: none; }
 .chatbox.big::-webkit-scrollbar{ width:0; display: none; }
 .chatbox.big::-webkit-scrollbar-track{ background: transparent; }
 .chatbox.big::-webkit-scrollbar-thumb{
+
+/* Duration Presets - Liquid Glass theme */
+.duration-presets {
+  background: rgba(10, 10, 10, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
   background: transparent;
   backdrop-filter: blur(4px);
   border-radius:10px;

@@ -444,7 +444,7 @@
     <div class="logo">TWIN.</div>
     <div class="tagline">Stock Market Intelligence</div>
     <div class="description">
-      Powered by advanced machine learning and technical analysis, TWIN provides intelligent stock price predictions and comprehensive market diagnostics.
+      Powered by advanced data and technical analysis, TWIN provides intelligent stock price predictions and comprehensive market diagnostics.
     </div>
 
     <ul class="feature-list">
@@ -544,6 +544,15 @@
     async function checkSession() {
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (session) {
+        // Clear stale localStorage data for clean slate
+        localStorage.removeItem('twin_predictions');
+        localStorage.removeItem('twin_messages_basic');
+        localStorage.removeItem('twin_messages_plus');
+        localStorage.removeItem('twin_chat_history');
+        localStorage.removeItem('twin_last_query');
+        localStorage.setItem('clear_chat_on_load', 'true');
+        
+        // Set auth data
         localStorage.setItem('twin_user_logged_in', 'true');
         localStorage.setItem('twin_user_email', session.user.email);
         localStorage.setItem('twin_supabase_token', session.access_token);
@@ -639,6 +648,10 @@
         localStorage.removeItem('twin_user_name');
         localStorage.removeItem('twin_supabase_token');
         localStorage.removeItem('twin_last_query');
+        localStorage.removeItem('twin_predictions');
+        localStorage.removeItem('twin_messages_basic');
+        localStorage.removeItem('twin_messages_plus');
+        localStorage.removeItem('twin_chat_history');
         localStorage.setItem('twin_user_mode', 'guest');
         window.location.href = 'index.html';
       });
@@ -736,6 +749,14 @@
               
               if (error) throw error;
               
+              // Clear stale localStorage data for fresh start
+              localStorage.removeItem('twin_predictions');
+              localStorage.removeItem('twin_messages_basic');
+              localStorage.removeItem('twin_messages_plus');
+              localStorage.removeItem('twin_chat_history');
+              localStorage.removeItem('twin_last_query');
+              localStorage.setItem('clear_chat_on_load', 'true');
+              
               // Store session immediately and redirect (no email confirmation needed)
               const displayName = username;
               localStorage.setItem('twin_user_logged_in', 'true');
@@ -764,7 +785,10 @@
               
               // Clear any existing session data to ensure fresh start
               localStorage.removeItem('twin_predictions');
+              localStorage.removeItem('twin_messages_basic');
+              localStorage.removeItem('twin_messages_plus');
               localStorage.removeItem('twin_chat_history');
+              localStorage.removeItem('twin_last_query');
               sessionStorage.clear();
               
               // Set flag to clear chat DOM on next page load
@@ -777,6 +801,31 @@
               localStorage.setItem('twin_user_name', displayName);
               localStorage.setItem('twin_user_mode', 'authenticated');
               localStorage.setItem('twin_supabase_token', data.session.access_token);
+              
+              // Sync predictions from database to localStorage
+              try {
+                const predRes = await fetch('http://127.0.0.1:5000/api/predictions/user', {
+                  headers: { 'Authorization': `Bearer ${data.session.access_token}` }
+                });
+                const predData = await predRes.json();
+                if (predData.success && predData.predictions) {
+                  const predictions = predData.predictions.map(p => ({
+                    id: p.id,
+                    stock: p.stock,
+                    duration: p.duration,
+                    lastClose: p.last_close,
+                    predictedPrice: p.predicted_price,
+                    method: p.method,
+                    delta: p.delta,
+                    pct: p.pct,
+                    timestamp: p.timestamp,
+                    feedback: p.feedback
+                  }));
+                  localStorage.setItem('twin_predictions', JSON.stringify(predictions));
+                }
+              } catch (e) {
+                console.log('Could not sync predictions:', e);
+              }
               
               loginBtn.textContent = 'Success! Redirecting...';
               loginBtn.style.background = 'linear-gradient(90deg, #22c55e, #16a34a)';
@@ -797,7 +846,10 @@
           if ((email.includes('@') || email.length > 2) && password.length >= 4) {
             // Clear any existing session data to ensure fresh start
             localStorage.removeItem('twin_predictions');
+            localStorage.removeItem('twin_messages_basic');
+            localStorage.removeItem('twin_messages_plus');
             localStorage.removeItem('twin_chat_history');
+            localStorage.removeItem('twin_last_query');
             sessionStorage.clear();
             
             // Set flag to clear chat DOM on next page load

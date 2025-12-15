@@ -105,16 +105,10 @@ function formatTimestamp(timestamp) {
   return `${date.getFullYear()}-${month}-${day}<br>${displayHours}:${minutes} ${ampm}`;
 }
 
-// Load and display predictions
-async function loadPredictions() {
-  currentPredictions = await getPredictions();
+// Display predictions from current array (no fetch)
+function displayPredictions() {
   const list = document.getElementById('predictionsList');
   const countEl = document.getElementById('predictionsCount');
-  
-  console.log('Loading predictions...');
-  console.log('Raw localStorage:', localStorage.getItem('twin_predictions'));
-  console.log('Parsed predictions:', currentPredictions);
-  console.log('Number of predictions:', currentPredictions.length);
   
   // Update count
   countEl.textContent = `${currentPredictions.length} PREDICTION${currentPredictions.length !== 1 ? 'S' : ''}`;
@@ -154,6 +148,16 @@ async function loadPredictions() {
       </div>
     `;
   }).join('');
+}
+
+// Load and display predictions from backend/storage
+async function loadPredictions() {
+  currentPredictions = await getPredictions();
+  console.log('Loading predictions...');
+  console.log('Raw localStorage:', localStorage.getItem('twin_predictions'));
+  console.log('Parsed predictions:', currentPredictions);
+  console.log('Number of predictions:', currentPredictions.length);
+  displayPredictions();
 }
 
 // Expand prediction with detailed view and feedback options
@@ -206,7 +210,7 @@ function expandPrediction(index) {
       
       ${pred.feedback ? renderFeedbackResult(pred.feedback) : renderFeedbackButtons(index)}
       
-      <button class="delete-btn" onclick="deletePrediction(${index}); event.stopPropagation();" style="width: 48px; height: 48px; margin: 16px auto 0; padding: 0; font-size: 16px; display: flex; align-items: center; justify-content: center;" title="Delete Prediction">
+      <button class="delete-btn" onclick="deletePrediction(${index})" style="width: 48px; height: 48px; margin: 16px auto 0; padding: 0; font-size: 16px; display: flex; align-items: center; justify-content: center;" title="Delete Prediction">
         <i class="fas fa-trash"></i>
       </button>
     </div>
@@ -215,6 +219,12 @@ function expandPrediction(index) {
   overlay.innerHTML = expandedHTML;
   overlay.classList.add('show');
   
+  // Add smooth animation
+  const expandedCard = overlay.querySelector('.expanded-card');
+  if (expandedCard) {
+    expandedCard.style.animation = 'fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+  }
+  
   // Prevent body scrolling
   document.body.style.overflow = 'hidden';
 }
@@ -222,13 +232,13 @@ function expandPrediction(index) {
 // Render feedback buttons
 function renderFeedbackButtons(index) {
   return `
-    <div class="feedback-section">
+    <div class="feedback-section" style="animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);">
       <div class="feedback-title">Was this prediction accurate?</div>
       <div class="feedback-btns">
-        <button class="feedback-btn yes" onclick="handleFeedback(${index}, 'accurate'); event.stopPropagation();">
+        <button class="feedback-btn yes" onclick="handleFeedback(${index}, 'accurate')" style="animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s backwards;">
           <i class="fas fa-check"></i> YES, ACCURATE
         </button>
-        <button class="feedback-btn no" onclick="promptInaccuracy(${index}); event.stopPropagation();">
+        <button class="feedback-btn no" onclick="promptInaccuracy(${index})" style="animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s backwards;">
           <i class="fas fa-times"></i> NO, INACCURATE
         </button>
       </div>
@@ -261,9 +271,17 @@ function renderFeedbackResult(feedback) {
 
 // Handle accurate feedback
 function handleFeedback(index, feedback) {
+  // Submit feedback and close immediately
   submitFeedback(index, feedback, null);
+  
+  // Close expansion immediately
+  const overlay = document.getElementById('expansionOverlay');
+  overlay.classList.remove('show');
+  overlay.innerHTML = '';
+  document.body.style.overflow = '';
+  
+  // Show thank you modal
   showFeedbackModal('Thank you for verifying our model!', 'Your feedback helps us improve prediction accuracy.');
-  closeExpansion();
 }
 
 // Prompt for inaccuracy details
@@ -273,60 +291,49 @@ function promptInaccuracy(index) {
   
   // Replace feedback section with inaccuracy input
   const feedbackSection = overlay.querySelector('.feedback-section');
-  feedbackSection.innerHTML = `
-    <div class="feedback-title">How inaccurate was it?</div>
-    <div class="inaccuracy-section">
-      <label>Actual Price (optional)</label>
-      <input type="number" step="0.01" id="actualPrice" placeholder="Enter actual price" />
-      <button class="submit-feedback-btn" onclick="submitInaccuracy(${index}); event.stopPropagation();">
-        SUBMIT FEEDBACK
+  feedbackSection.style.animation = 'fadeOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards';
+  
+  setTimeout(() => {
+    feedbackSection.innerHTML = `
+      <div class="feedback-title" style="animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);">How inaccurate was it?</div>
+      <div class="inaccuracy-section" style="animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s backwards;">
+        <label>Actual Price (optional)</label>
+        <input type="number" step="0.01" id="actualPrice" placeholder="Enter actual price" />
+        <button class="submit-feedback-btn" onclick="submitInaccuracy(${index})">
+          SUBMIT FEEDBACK
+        </button>
+      </div>
+      <button class="feedback-btn no" onclick="expandPrediction(${index})" style="margin-top: 12px; animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s backwards;">
+        <i class="fas fa-arrow-left"></i> BACK
       </button>
-    </div>
-    <button class="feedback-btn no" onclick="expandPrediction(${index}); event.stopPropagation();" style="margin-top: 12px;">
-      <i class="fas fa-arrow-left"></i> BACK
-    </button>
-  `;
+    `;
+    feedbackSection.style.animation = 'fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+  }, 300);
 }
 
 // Submit inaccuracy feedback
 function submitInaccuracy(index) {
   const actualPrice = document.getElementById('actualPrice').value;
+  
+  // Submit feedback and close immediately
   submitFeedback(index, 'inaccurate', actualPrice ? parseFloat(actualPrice) : null);
+  
+  // Close expansion immediately
+  const overlay = document.getElementById('expansionOverlay');
+  overlay.classList.remove('show');
+  overlay.innerHTML = '';
+  document.body.style.overflow = '';
+  
+  // Show thank you modal
   showFeedbackModal('Thank you for strengthening our model!', 'Your feedback helps us improve future predictions.');
-  closeExpansion();
 }
 
 // Submit feedback to backend
-async function submitFeedback(index, feedback, actualPrice = null) {
+function submitFeedback(index, feedback, actualPrice = null) {
   const pred = currentPredictions[index];
   if (!pred) return;
 
-  const token = localStorage.getItem('twin_supabase_token');
-  
-  if (token) {
-    try {
-      const response = await fetch('/save_feedback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          prediction_id: pred.id,
-          feedback: feedback,
-          actual_price: actualPrice
-        })
-      });
-      
-      if (response.ok) {
-        console.log('Feedback saved to backend');
-      }
-    } catch (error) {
-      console.error('Error saving feedback:', error);
-    }
-  }
-  
-  // Update local state
+  // Update local state immediately
   currentPredictions[index].feedback = feedback;
   if (actualPrice) {
     currentPredictions[index].actualPrice = actualPrice;
@@ -338,7 +345,31 @@ async function submitFeedback(index, feedback, actualPrice = null) {
     localStorage.setItem('twin_predictions', JSON.stringify(currentPredictions));
   }
   
-  loadPredictions();
+  // Display updated predictions immediately
+  displayPredictions();
+
+  // Save to backend in background
+  const token = localStorage.getItem('twin_supabase_token');
+  if (token) {
+    fetch('/save_feedback', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        prediction_id: pred.id,
+        feedback: feedback,
+        actual_price: actualPrice
+      })
+    }).then(response => {
+      if (response.ok) {
+        console.log('Feedback saved to backend');
+      }
+    }).catch(error => {
+      console.error('Error saving feedback:', error);
+    });
+  }
 }
 
 // Show feedback modal
@@ -349,42 +380,36 @@ function showFeedbackModal(title, message) {
   
   titleEl.textContent = title;
   messageEl.textContent = message;
-  overlay.classList.add('show');
+  
+  // Add smooth entry animation
+  requestAnimationFrame(() => {
+    overlay.classList.add('show');
+  });
 }
 
 // Close expansion
 function closeExpansion() {
   const overlay = document.getElementById('expansionOverlay');
-  overlay.classList.remove('show');
-  overlay.innerHTML = '';
-  document.body.style.overflow = '';
+  const expandedCard = overlay.querySelector('.expanded-card');
+  
+  // Animate out before removing
+  if (expandedCard) {
+    expandedCard.style.animation = 'fadeOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards';
+  }
+  
+  setTimeout(() => {
+    overlay.classList.remove('show');
+    overlay.innerHTML = '';
+    document.body.style.overflow = '';
+  }, 300);
 }
 
 // Delete prediction
-async function deletePrediction(index) {
+function deletePrediction(index) {
   const pred = currentPredictions[index];
   if (!pred) return;
 
-  const token = localStorage.getItem('twin_supabase_token');
-  
-  if (token) {
-    try {
-      const response = await fetch(`/api/predictions/delete/${pred.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (response.ok) {
-        console.log('Prediction deleted from backend');
-      }
-    } catch (error) {
-      console.error('Error deleting prediction:', error);
-    }
-  }
-  
-  // Remove from local state
+  // Immediately update data and UI
   currentPredictions.splice(index, 1);
   
   // Update localStorage for guest users
@@ -393,46 +418,66 @@ async function deletePrediction(index) {
     localStorage.setItem('twin_predictions', JSON.stringify(currentPredictions));
   }
   
-  closeExpansion();
-  loadPredictions();
+  // Close expansion immediately without animation
+  const overlay = document.getElementById('expansionOverlay');
+  overlay.classList.remove('show');
+  overlay.innerHTML = '';
+  document.body.style.overflow = '';
+  
+  // Display updated predictions (no fetch)
+  displayPredictions();
+  
+  // Delete from backend in background
+  const token = localStorage.getItem('twin_supabase_token');
+  if (token) {
+    fetch(`/api/predictions/delete/${pred.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).then(response => {
+      if (response.ok) {
+        console.log('Prediction deleted from backend');
+      }
+    }).catch(error => {
+      console.error('Error deleting prediction:', error);
+    });
+  }
 }
 
 // Clear all predictions
-async function clearAllPredictions() {
+function clearAllPredictions() {
   const modal = document.getElementById('clearAllModalOverlay');
   modal.classList.add('show');
 }
 
 // Confirm clear all
-async function confirmClearAll() {
+function confirmClearAll() {
   const token = localStorage.getItem('twin_supabase_token');
   
-  if (token) {
-    try {
-      const response = await fetch('/api/predictions/clear', {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to clear predictions');
-      }
-      
-      console.log('All predictions cleared from backend');
-    } catch (error) {
-      console.error('Error clearing predictions:', error);
-      alert('Failed to clear predictions. Please try again.');
-      cancelClearAll();
-      return;
-    }
-  }
-  
-  // Clear local storage
-  localStorage.removeItem('twin_predictions');
+  // Immediately close modal and clear UI
   cancelClearAll();
-  await loadPredictions();
+  currentPredictions = [];
+  displayPredictions();
+  
+  // Clear localStorage immediately
+  localStorage.removeItem('twin_predictions');
+  
+  // Delete from backend in background
+  if (token) {
+    fetch('/api/predictions/clear', {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).then(response => {
+      if (response.ok) {
+        console.log('All predictions cleared from backend');
+      }
+    }).catch(error => {
+      console.error('Error clearing predictions:', error);
+    });
+  }
 }
 
 // Cancel clear all
@@ -444,7 +489,16 @@ function cancelClearAll() {
 // Close feedback modal
 function closeFeedbackModal() {
   const overlay = document.getElementById('feedbackModalOverlay');
-  overlay.classList.remove('show');
+  const modal = overlay.querySelector('.feedback-modal');
+  
+  // Animate out
+  modal.style.transform = 'scale(0.8) translateY(20px)';
+  modal.style.opacity = '0';
+  overlay.style.opacity = '0';
+  
+  setTimeout(() => {
+    overlay.classList.remove('show');
+  }, 400);
 }
 
 // Logout function
@@ -486,6 +540,17 @@ function setupEventListeners() {
     }
   });
 }
+
+// Make functions globally accessible for inline onclick handlers
+window.deletePrediction = deletePrediction;
+window.handleFeedback = handleFeedback;
+window.promptInaccuracy = promptInaccuracy;
+window.submitInaccuracy = submitInaccuracy;
+window.expandPrediction = expandPrediction;
+window.closeFeedbackModal = closeFeedbackModal;
+window.closeExpansion = closeExpansion;
+window.cancelClearAll = cancelClearAll;
+window.confirmClearAll = confirmClearAll;
 
 // Initialize
 setupEventListeners();

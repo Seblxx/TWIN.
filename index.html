@@ -378,11 +378,17 @@
     display: flex;
     gap: 8px;
     margin-top: 8px;
+    margin-bottom: 32px;
+    padding: 12px 16px;
+    backdrop-filter: blur(20px);
+    border-radius: 12px;
     flex-wrap: wrap;
     align-items: center;
     justify-content: flex-start;
     animation: fadeIn 0.3s ease;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
     z-index: 10;
+    /* Background and border set in theme CSS files */
   }
   
   .preset-label {
@@ -555,14 +561,22 @@
         });
       }
       
-      // Update on theme change  
-      setInterval(() => {
+      // Update on theme change
+      let themeCheckInterval = setInterval(() => {
         const currentTheme = localStorage.getItem('twin_theme_css') || 'dark.css';
         const currentThemeName = currentTheme.replace('.css', '');
         if (document.body.getAttribute('data-theme') !== currentThemeName) {
           document.body.setAttribute('data-theme', currentThemeName);
         }
       }, 500);
+      
+      // Clear interval on page unload
+      window.addEventListener('beforeunload', () => {
+        if (themeCheckInterval) {
+          clearInterval(themeCheckInterval);
+          themeCheckInterval = null;
+        }
+      });
     });
   </script>
   <div class="shell">

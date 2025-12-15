@@ -111,10 +111,16 @@ body{
 .card-head-plus{ background: var(--head-glass-plus); }
 
 
-.chatbox.big{ height:500px; overflow:auto; padding:14px 16px; } /* was 560 */
+.chatbox.big{ height:500px; overflow:auto; padding:14px 16px; scrollbar-width: none; -ms-overflow-style: none; } /* was 560 */
 .chatbox.big::-webkit-scrollbar{ width:0; display: none; }
 .chatbox.big::-webkit-scrollbar-track{ background: transparent; }
 .chatbox.big::-webkit-scrollbar-thumb{
+
+/* Duration Presets - Dark theme */
+.duration-presets {
+  background: rgba(10, 10, 10, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
   background: transparent;
   border-radius:10px;
 }

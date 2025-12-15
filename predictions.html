@@ -343,14 +343,36 @@
       width: 100%;
       max-height: 90vh;
       overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
       position: relative;
       animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     }
 
+    .expanded-card::-webkit-scrollbar {
+      display: none;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(-20px); }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @keyframes slideUp {
@@ -606,7 +628,8 @@
       backdrop-filter: blur(8px);
       z-index: 11000;
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: hidden !important;
     }
 
     .feedback-modal-overlay.show {
@@ -625,13 +648,25 @@
       padding: 32px;
       max-width: 450px;
       width: 90%;
-      transform: scale(0.9);
-      transition: transform 0.3s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+      transform: scale(0.8) translateY(20px);
+      opacity: 0;
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
       text-align: center;
     }
 
+    .feedback-modal::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+
     .feedback-modal-overlay.show .feedback-modal {
-      transform: scale(1);
+      transform: scale(1) translateY(0);
+      opacity: 1;
     }
 
     .feedback-modal h3 {
@@ -658,12 +693,36 @@
       font-size: 15px;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feedback-modal button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .feedback-modal button:active::before {
+      width: 300px;
+      height: 300px;
     }
 
     .feedback-modal button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(72,182,255,0.4);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(72,182,255,0.5);
+    }
+
+    .feedback-modal button:active {
+      transform: translateY(0) scale(0.98);
     }
 
     /* Clear All Modal Styles - centered like login */

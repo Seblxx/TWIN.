@@ -120,10 +120,16 @@ body{
 }
 
 
-.chatbox.big{ height:500px; overflow:auto; padding:14px 16px; } /* was 560 */
+.chatbox.big{ height:500px; overflow:auto; padding:14px 16px; scrollbar-width: none; -ms-overflow-style: none; } /* was 560 */
 .chatbox.big::-webkit-scrollbar{ width:0; display: none; }
 .chatbox.big::-webkit-scrollbar-track{ background: transparent; }
 .chatbox.big::-webkit-scrollbar-thumb{
+
+/* Duration Presets - Royal theme */
+.duration-presets {
+  background: rgba(30, 58, 138, 0.95);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
   background: transparent;
   border-radius:10px;
 }
