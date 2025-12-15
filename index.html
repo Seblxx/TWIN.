@@ -371,13 +371,18 @@
   
   /* Duration Presets */
   .duration-presets {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
     display: flex;
     gap: 8px;
-    margin-top: 12px;
+    margin-top: 8px;
     flex-wrap: wrap;
     align-items: center;
     justify-content: flex-start;
     animation: fadeIn 0.3s ease;
+    z-index: 10;
   }
   
   .preset-label {
@@ -490,6 +495,14 @@
     white-space: nowrap !important;
     min-width: fit-content !important;
     max-width: fit-content !important;
+  }
+  
+  /* Fix controls grid to prevent button expansion */
+  .controls {
+    display: grid !important;
+    grid-template-columns: 1fr minmax(auto, max-content) !important;
+    gap: 10px !important;
+    align-items: center !important;
   }
 
   /* Menu overlay - behind the menu options */

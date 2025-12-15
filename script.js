@@ -8,7 +8,7 @@ function renderSparkline(ticker, container) {
   if (!container) return;
   
   // Fetch historical data and render SVG chart
-  fetch(`http://localhost:5000/history?ticker=${ticker}&days=30`)
+  fetch(`https://twin-hz5k.onrender.com/history?ticker=${ticker}&days=30`)
     .then(r => r.json())
     .then(data => {
       if (!data.closes || data.closes.length === 0) {
@@ -583,7 +583,7 @@ function completeFeedbackSubmission(predId, feedback, inaccuracyData, notes) {
     localStorage.setItem('twin_predictions', JSON.stringify(predictions));
     
     // Save feedback to backend
-    fetch('http://localhost:5000/save_feedback', {
+    fetch('https://twin-hz5k.onrender.com/save_feedback', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1504,7 +1504,7 @@ async function updateExistingForecast(bot, newMethod, query) {
     // Add loading indicator to existing bot
     bot.style.opacity = '0.6';
     
-    const url = 'http://localhost:5000/predict';
+    const url = 'https://twin-hz5k.onrender.com/predict';
     const payload = { input: `${query}`, method: newMethod };
     
     const r = await fetch(url, {
@@ -1625,9 +1625,9 @@ async function sendBasic(methodOverride = null, reusedQuery = null) {
   const loading = addLoading(pane);
 
   try {
-    console.log('Fetching from:', 'http://localhost:5000/predict');
+    console.log('Fetching from:', 'https://twin-hz5k.onrender.com/predict');
     // FETCH UNCHANGED
-    const r = await fetch('http://localhost:5000/predict', {
+    const r = await fetch('https://twin-hz5k.onrender.com/predict', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ input: q, method: methodOverride || undefined })
@@ -1888,13 +1888,13 @@ async function sendPlus(queryFromTwin = null, methodOverride = null) {
   const loading = addLoading(pane);
 
   try {
-    console.log('Fetching TWIN+ from:', 'http://localhost:5000/predict_plus');
+    console.log('Fetching TWIN+ from:', 'https://twin-hz5k.onrender.com/predict_plus');
     const payload = { input: q };
     if (methodOverride) {
       payload.method = methodOverride;
       console.log('Including method in payload:', methodOverride);
     }
-    const r = await fetch('http://localhost:5000/predict_plus', {
+    const r = await fetch('https://twin-hz5k.onrender.com/predict_plus', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
