@@ -285,7 +285,7 @@
     // MY PREDICTIONS (leaderboard)
     const predsBtn = document.getElementById('menuPredictions');
     if (predsBtn) {
-      // Update button state based on localStorage (synced from database)
+      // Update button state based on login only - always accessible when logged in
       function updatePredictionsButton() {
         const isLoggedIn = localStorage.getItem('twin_user_logged_in') === 'true';
         
@@ -294,29 +294,15 @@
           return;
         }
         
+        // Show and enable button when logged in (even if no predictions)
         predsBtn.style.display = '';
-        
-        // Check localStorage (already synced from database by getSavedPredictions)
-        let predictions = [];
-        try {
-          predictions = JSON.parse(localStorage.getItem('twin_predictions') || '[]');
-        } catch (e) {
-          predictions = [];
-        }
-        
-        const isEmpty = predictions.length === 0;
-        predsBtn.style.opacity = isEmpty ? '0.4' : '1';
-        predsBtn.style.cursor = isEmpty ? 'not-allowed' : 'pointer';
-        predsBtn.disabled = isEmpty;
+        predsBtn.style.opacity = '1';
+        predsBtn.style.cursor = 'pointer';
+        predsBtn.disabled = false;
       }
       
       // Initial update
       updatePredictionsButton();
-      
-      // Update when predictions change (events dispatched from getSavedPredictions)
-      window.addEventListener('predictionsSaved', updatePredictionsButton);
-      window.addEventListener('predictionsCleared', updatePredictionsButton);
-      window.addEventListener('predictionDeleted', updatePredictionsButton);
       
       predsBtn.addEventListener('click', () => {
         if (!predsBtn.disabled) {
